@@ -1,190 +1,66 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { createRoot } from "react-dom/client";
-import {
-  LayoutDashboard, Building2, Plus, Search, ExternalLink, Mail, Phone,
-  Pencil, Trash2, TrendingUp, Target, CheckCircle2, Euro, X, Download, Upload
-} from "lucide-react";
-import "./styles.css";
+import React,{useEffect,useMemo,useState}from"react";
+import{createRoot}from"react-dom/client";
+import{LayoutDashboard,Building2,Plus,Search,Mail,Phone,Pencil,Trash2,Target,CheckCircle2,X,Download,Upload,Users,GraduationCap,Wallet,Image as ImageIcon,Copy,Check,CalendarClock,MessageSquareText,UserRound,FileImage}from"lucide-react";
+import"./styles.css";
 
-const statuses = ["NEW","CHECKED","GOOD LEAD","DEMO READY","CONTACTED","FOLLOW UP","INTERESTED","WON","LOST"];
-const industries = ["Autoserviss","Būvniecība","Viesu nams","Skaistumkopšana","Zobārstniecība","Cits"];
-
-const demo = [
-  {id:"1",company:"Cēsis Auto Serviss",industry:"Autoserviss",city:"Cēsis",website:"https://example.com",email:"info@cesisauto.lv",phone:"+371 20000001",score:82,status:"DEMO READY",demo:"https://example.com",value:399,notes:"Novecojis dizains, slikts mobile UX, nav skaidras CTA.",lastContact:"2026-09-17",nextFollowUp:"2026-09-21"},
-  {id:"2",company:"Vidzemes Motors",industry:"Autoserviss",city:"Valmiera",website:"",email:"serviss@vidzemesmotors.lv",phone:"+371 20000002",score:91,status:"GOOD LEAD",demo:"",value:399,notes:"Nav savas mājaslapas. Aktīvs Facebook profils.",lastContact:"",nextFollowUp:""},
-  {id:"3",company:"AutoFix Riga",industry:"Autoserviss",city:"Rīga",website:"https://example.org",email:"info@autofix.lv",phone:"+371 20000003",score:64,status:"CONTACTED",demo:"https://example.org",value:499,notes:"Nosūtīts demo. Jāveic follow-up.",lastContact:"2026-09-18",nextFollowUp:"2026-09-22"}
+const statuses=["NEW","MOCKUP READY","CONTACTED","REPLIED","INTERESTED","MEETING","DEPOSIT PAID","IN DEVELOPMENT","WON","LOST"];
+const labels={"NEW":"Jauns","MOCKUP READY":"Mockup gatavs","CONTACTED":"Sazināts","REPLIED":"Atbildēja","INTERESTED":"Interesējas","MEETING":"Google Meet","DEPOSIT PAID":"Priekšapmaksa","IN DEVELOPMENT":"Izstrādē","WON":"Pabeigts","LOST":"Zaudēts"};
+const industries=["Autoserviss","Būvniecība","Viesu nams","Skaistumkopšana","Zobārstniecība","Restorāns","Pakalpojumi","Cits"];
+const payoutStatuses=["DEPOSIT PAID","IN DEVELOPMENT","WON"];
+const defaultMembers=[{id:"admin",name:"Toms",role:"admin",payout:0},{id:"m1",name:"Mārtiņš",role:"sales",payout:50},{id:"m2",name:"Anna",role:"sales",payout:50}];
+const emptyLead={company:"",industry:"Autoserviss",city:"",website:"",email:"",phone:"",score:50,status:"NEW",value:399,notes:"",lastContact:"",nextFollowUp:"",ownerId:"",commission:null,commissionPaid:false,mockupImage:"",contactLog:[]};
+const seed=[
+{id:"1",company:"Cēsis Auto Serviss",industry:"Autoserviss",city:"Cēsis",website:"https://example.com",email:"info@cesisauto.lv",phone:"+371 20000001",score:82,status:"MOCKUP READY",value:399,notes:"Novecojis dizains, vājš mobile UX.",lastContact:"",nextFollowUp:"",ownerId:"m1",commission:null,commissionPaid:false,mockupImage:"",contactLog:[]},
+{id:"2",company:"Vidzemes Motors",industry:"Autoserviss",city:"Valmiera",website:"",email:"serviss@vidzemesmotors.lv",phone:"+371 20000002",score:91,status:"CONTACTED",value:399,notes:"Nav savas mājaslapas.",lastContact:"2026-09-20",nextFollowUp:"2026-09-24",ownerId:"m2",commission:null,commissionPaid:false,mockupImage:"",contactLog:[{id:"c1",date:"2026-09-20",type:"E-pasts",note:"Nosūtīts pirmais piedāvājums un mockup."}]},
+{id:"3",company:"AutoFix Riga",industry:"Autoserviss",city:"Rīga",website:"https://example.org",email:"info@autofix.lv",phone:"+371 20000003",score:76,status:"DEPOSIT PAID",value:399,notes:"Klients apstiprināja standarta lapu.",lastContact:"2026-09-21",nextFollowUp:"",ownerId:"m1",commission:null,commissionPaid:false,mockupImage:"",contactLog:[{id:"c2",date:"2026-09-21",type:"E-pasts",note:"Saņemta priekšapmaksa."}]}
+];
+const tutorial=[
+["Atrodi uzņēmumu","Meklē uzņēmumus ar vecu, neskaidru vai vāju mājaslapu. Izvēlies tādus, kam jauns dizains reāli varētu dot vērtību.","Izveido klienta ierakstu Tagorit un aizpildi kontaktus."],
+["Izvērtē esošo lapu","Apskati dizainu, mobilo versiju, CTA, kontaktus, saturu un kopējo profesionālo iespaidu.","Pieraksti 2–5 konkrētus uzlabojumus pie klienta piezīmēm."],
+["Uztaisi mockup","Ar AI izveido tīru, modernu redesign konceptu. Mērķis ir saprotams pirms/pēc efekts, nevis pārspīlēts dizains.","Pievieno nosūtāmo mockup bildi klienta profilam."],
+["Uzraksti klientam","Sūti īsu personalizētu e-pastu. Norādi 1–2 lietas, ko pamanīji, parādi mockup un piedāvā standarta lapu par 399 €.","Atzīmē statusu Sazināts un follow-up datumu."],
+["Veic follow-up","Ja 3–4 dienas nav atbildes, nosūti vienu īsu follow-up. Nespamo un nespied klientu.","Atjauno pēdējā kontakta datumu un klienta atbildi."],
+["Kvalificē interesi","Ja parādās veikals, booking, maksājumi vai custom integrācijas, nepiedāvā cenu pats.","Sarunā Google Meet ar Tomu."],
+["Darījums = atlīdzība","Atlīdzība rodas tikai tad, kad klients reāli samaksājis priekšapmaksu. Summu nosaka administrators.","Nomaini statusu uz Priekšapmaksa."]
+];
+const scripts=[
+{title:"Pirmais e-pasts",subject:"Maza ideja Jūsu mājaslapai",text:"Sveiki!\n\nApskatījos Jūsu mājaslapu un pamanīju, ka dažas lietas varētu padarīt mūsdienīgākas un ērtākas, īpaši mobilajā versijā.\n\nIntereses pēc uztaisīju arī nelielu redesign piemēru, kā mājaslapa varētu izskatīties tīrāk un profesionālāk.\n\n[MOCKUP / DEMO LINKS]\n\nJa virziens patīk, šādu mājaslapu varam pilnībā sagatavot un palaist par fiksētu cenu — 399 €.\n\nCenā ietilpst responsīvs dizains, kontaktforma, pamata SEO un palaišana.\n\nJa šobrīd nav aktuāli, viss kārtībā. :)"},
+{title:"Follow-up pēc 3–4 dienām",subject:"Par mājaslapas piemēru",text:"Sveiki!\n\nTikai pacelšu iepriekšējo ziņu augstāk — vai sanāca apskatīt nosūtīto mājaslapas piemēru?\n\nJa šobrīd nav aktuāli, droši dodiet ziņu un vairs netraucēšu.\n\nPaldies!"},
+{title:"Custom funkcijas",subject:"Par papildu funkcionalitāti",text:"Jā, to noteikti var realizēt.\n\nTā kā šeit jau ir papildu funkcionalitāte ārpus standarta mājaslapas paketes, piedāvāju sarunāt īsu Google Meet ar mūsu izstrādātāju Tomu. Tad varēsim precīzi iziet cauri prasībām un pateikt korektu cenu un termiņu."}
 ];
 
-const empty = {company:"",industry:"Autoserviss",city:"",website:"",email:"",phone:"",score:50,status:"NEW",demo:"",value:399,notes:"",lastContact:"",nextFollowUp:""};
-
 function App(){
-  const [leads,setLeads]=useState(()=>{
-    try{return JSON.parse(localStorage.getItem("tagorit_leads"))||demo}catch{return demo}
-  });
-  const [view,setView]=useState("dashboard");
-  const [query,setQuery]=useState("");
-  const [status,setStatus]=useState("ALL");
-  const [modal,setModal]=useState(null);
-
-  useEffect(()=>localStorage.setItem("tagorit_leads",JSON.stringify(leads)),[leads]);
-
-  const filtered=useMemo(()=>leads.filter(l=>{
-    const hay=(l.company+" "+l.city+" "+l.email+" "+l.industry).toLowerCase();
-    return hay.includes(query.toLowerCase())&&(status==="ALL"||l.status===status);
-  }),[leads,query,status]);
-
-  const stats=useMemo(()=>({
-    total:leads.length,
-    hot:leads.filter(l=>l.score>=70&&!["WON","LOST"].includes(l.status)).length,
-    contacted:leads.filter(l=>["CONTACTED","FOLLOW UP","INTERESTED","WON"].includes(l.status)).length,
-    won:leads.filter(l=>l.status==="WON").length,
-    revenue:leads.filter(l=>l.status==="WON").reduce((a,b)=>a+Number(b.value||0),0),
-    pipeline:leads.filter(l=>!["WON","LOST"].includes(l.status)).reduce((a,b)=>a+Number(b.value||0),0)
-  }),[leads]);
-
-  function save(e){
-    e.preventDefault();
-    if(!modal.company.trim()) return;
-    if(modal.id) setLeads(x=>x.map(l=>l.id===modal.id?modal:l));
-    else setLeads(x=>[{...modal,id:crypto.randomUUID()},...x]);
-    setModal(null);
-  }
-
-  function remove(id){
-    if(confirm("Dzēst šo uzņēmumu?")) setLeads(x=>x.filter(l=>l.id!==id));
-  }
-
-  function exportData(){
-    const blob=new Blob([JSON.stringify(leads,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;a.download="tagorit-backup.json";a.click();URL.revokeObjectURL(url);
-  }
-
-  function importData(e){
-    const file=e.target.files?.[0]; if(!file)return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try{
-        const data=JSON.parse(reader.result);
-        if(!Array.isArray(data))throw new Error();
-        setLeads(data);
-      }catch{alert("Nederīgs backup fails.")}
-    };
-    reader.readAsText(file);
-  }
-
-  return <div className="shell">
-    <aside>
-      <div className="brand"><div className="mark">T</div><div><b>Tagorit</b><small>Lead CRM</small></div></div>
-      <nav>
-        <button className={view==="dashboard"?"active":""} onClick={()=>setView("dashboard")}><LayoutDashboard size={18}/>Dashboard</button>
-        <button className={view==="leads"?"active":""} onClick={()=>setView("leads")}><Building2 size={18}/>Uzņēmumi <span>{leads.length}</span></button>
-      </nav>
-      <div className="goal"><Target size={18}/><div><b>Dienas mērķis</b><small>15 jauni kontakti</small></div></div>
-    </aside>
-
-    <main>
-      <header>
-        <div><h1>{view==="dashboard"?"Pārdošanas pārskats":"Uzņēmumi"}</h1><p>{view==="dashboard"?"Lead pipeline un rezultāti vienuviet.":"Pārvaldi visus potenciālos klientus."}</p></div>
-        <div className="actions">
-          <button className="square" onClick={exportData}><Download size={17}/></button>
-          <label className="square"><Upload size={17}/><input hidden type="file" accept="application/json" onChange={importData}/></label>
-          <button className="primary" onClick={()=>setModal({...empty})}><Plus size={17}/>Pievienot uzņēmumu</button>
-        </div>
-      </header>
-
-      {view==="dashboard"?
-        <Dashboard stats={stats} leads={leads} go={()=>setView("leads")} edit={setModal}/>:
-        <Leads leads={filtered} query={query} setQuery={setQuery} status={status} setStatus={setStatus} edit={setModal} remove={remove} updateStatus={(id,s)=>setLeads(x=>x.map(l=>l.id===id?{...l,status:s}:l))}/>}
-    </main>
-
-    {modal&&<Modal lead={modal} setLead={setModal} close={()=>setModal(null)} save={save}/>}
-  </div>
+ const[leads,setLeads]=useState(()=>{try{const x=JSON.parse(localStorage.getItem("tagorit_leads"));return(x||seed).map(v=>({...emptyLead,...v,contactLog:Array.isArray(v.contactLog)?v.contactLog:[]}))}catch{return seed}});
+ const[members,setMembers]=useState(()=>{try{return JSON.parse(localStorage.getItem("tagorit_members"))||defaultMembers}catch{return defaultMembers}});
+ const[active,setActive]=useState(()=>localStorage.getItem("tagorit_active_user")||"admin");
+ const[view,setView]=useState("dashboard"),[query,setQuery]=useState(""),[status,setStatus]=useState("ALL"),[modal,setModal]=useState(null),[copied,setCopied]=useState("");
+ useEffect(()=>localStorage.setItem("tagorit_leads",JSON.stringify(leads)),[leads]);
+ useEffect(()=>localStorage.setItem("tagorit_members",JSON.stringify(members)),[members]);
+ useEffect(()=>localStorage.setItem("tagorit_active_user",active),[active]);
+ const user=members.find(m=>m.id===active)||members[0],isAdmin=user.role==="admin";
+ const visible=isAdmin?leads:leads.filter(l=>l.ownerId===active);
+ const filtered=visible.filter(l=>(l.company+" "+l.city+" "+l.email+" "+l.industry).toLowerCase().includes(query.toLowerCase())&&(status==="ALL"||l.status===status));
+ const stats=useMemo(()=>{const map=Object.fromEntries(members.map(m=>[m.id,m]));const c=l=>Number(l.commission??map[l.ownerId]?.payout??0);const elig=visible.filter(l=>payoutStatuses.includes(l.status));const earned=elig.reduce((a,l)=>a+c(l),0),paid=elig.filter(l=>l.commissionPaid).reduce((a,l)=>a+c(l),0);return{total:visible.length,contacted:visible.filter(l=>["CONTACTED","REPLIED","INTERESTED","MEETING","DEPOSIT PAID","IN DEVELOPMENT","WON"].includes(l.status)).length,hot:visible.filter(l=>["INTERESTED","MEETING"].includes(l.status)).length,deals:elig.length,revenue:elig.reduce((a,l)=>a+Number(l.value||0),0),earned,paid,pending:earned-paid}},[visible,members]);
+ function save(e){e.preventDefault();const x={...emptyLead,...modal,contactLog:modal.contactLog||[]};if(x.id)setLeads(v=>v.map(l=>l.id===x.id?x:l));else setLeads(v=>[{...x,id:crypto.randomUUID(),ownerId:x.ownerId||active},...v]);setModal(null)}
+ function remove(id){if(confirm("Dzēst šo klientu?"))setLeads(v=>v.filter(l=>l.id!==id))}
+ function exportData(){const b=new Blob([JSON.stringify({members,leads},null,2)],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="tagorit-backup.json";a.click();URL.revokeObjectURL(u)}
+ function importData(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.leads))setLeads(d.leads);if(Array.isArray(d.members))setMembers(d.members)}catch{alert("Nederīgs backup fails.")}};r.readAsText(f)}
+ const title={dashboard:isAdmin?"Komandas pārskats":"Mans pārskats",leads:"Klienti",tutorial:"Darba instrukcija",scripts:"Sarunu skripti",team:"Komanda"}[view];
+ return <div className="shell"><aside><div className="brand"><div className="mark">T</div><div><b>Tagorit</b><small>Sales workspace</small></div></div><div className="switch"><span>Skats</span><select value={active} onChange={e=>{setActive(e.target.value);setView("dashboard")}}>{members.map(m=><option key={m.id} value={m.id}>{m.name} · {m.role==="admin"?"Admin":"Sales"}</option>)}</select></div><nav><N icon={LayoutDashboard} a={view==="dashboard"} on={()=>setView("dashboard")}>Dashboard</N><N icon={Building2} a={view==="leads"} on={()=>setView("leads")}>Klienti</N><N icon={GraduationCap} a={view==="tutorial"} on={()=>setView("tutorial")}>Tutorial</N><N icon={MessageSquareText} a={view==="scripts"} on={()=>setView("scripts")}>Skripti</N>{isAdmin&&<N icon={Users} a={view==="team"} on={()=>setView("team")}>Komanda</N>}</nav><div className="goal"><Target size={18}/><div><b>Dienas mērķis</b><small>10–15 kvalitatīvi kontakti</small></div></div></aside><main><header><div><h1>{title}</h1><p>{isAdmin?"Pārvaldi pārdošanu, klientus un komandu vienuviet.":"Redzi savus klientus, soļus un nopelnīto."}</p></div><div className="actions">{isAdmin&&<><button className="square" onClick={exportData}><Download size={17}/></button><label className="square"><Upload size={17}/><input hidden type="file" accept="application/json" onChange={importData}/></label></>}{["dashboard","leads"].includes(view)&&<button className="primary" onClick={()=>setModal({...emptyLead,ownerId:isAdmin?(members.find(m=>m.role==="sales")?.id||""):active})}><Plus size={16}/>Pievienot klientu</button>}</div></header>
+ {view==="dashboard"&&<Dashboard stats={stats} leads={visible} members={members} edit={setModal} isAdmin={isAdmin}/>}
+ {view==="leads"&&<Leads leads={filtered} members={members} query={query} setQuery={setQuery} status={status} setStatus={setStatus} edit={setModal} remove={remove} update={(id,s)=>setLeads(v=>v.map(l=>l.id===id?{...l,status:s}:l))}/>}
+ {view==="tutorial"&&<Tutorial/>}
+ {view==="scripts"&&<Scripts copied={copied} setCopied={setCopied}/>}
+ {view==="team"&&isAdmin&&<Team members={members} setMembers={setMembers} leads={leads}/>}
+ </main>{modal&&<LeadModal lead={modal} setLead={setModal} members={members} isAdmin={isAdmin} save={save} close={()=>setModal(null)}/>}</div>
 }
-
-function Dashboard({stats,leads,go,edit}){
-  const recent=leads.slice(0,5);
-  return <div className="content">
-    <div className="cards">
-      <Card icon={Building2} label="Visi uzņēmumi" value={stats.total} note="Kopējais lead skaits"/>
-      <Card icon={TrendingUp} label="Karstie leadi" value={stats.hot} note="Score 70+"/>
-      <Card icon={Mail} label="Kontaktēti" value={stats.contacted} note="Aktīvā komunikācijā"/>
-      <Card icon={CheckCircle2} label="Uzvarēti" value={stats.won} note={`€${stats.revenue} ieņēmumi`}/>
-    </div>
-    <div className="grid">
-      <section className="panel">
-        <div className="panelHead"><div><h2>Pipeline</h2><p>Potenciālā vērtība</p></div><strong>€{stats.pipeline}</strong></div>
-        <div className="pipeline">
-          {statuses.filter(s=>!["LOST"].includes(s)).map(s=>{
-            const count=leads.filter(l=>l.status===s).length;
-            const pct=leads.length?Math.round(count/leads.length*100):0;
-            return <div className="bar" key={s}><span>{s}</span><div><i style={{width:`${pct}%`}}/></div><b>{count}</b></div>
-          })}
-        </div>
-      </section>
-      <section className="panel">
-        <div className="panelHead"><div><h2>Jaunākie leadi</h2><p>Pēdējie pievienotie</p></div><button className="link" onClick={go}>Skatīt visus</button></div>
-        {recent.map(l=><button className="recent" key={l.id} onClick={()=>edit({...l})}><span>{l.company.slice(0,2).toUpperCase()}</span><div><b>{l.company}</b><small>{l.city||"—"} · Score {l.score}</small></div></button>)}
-      </section>
-    </div>
-  </div>
-}
-
-function Card({icon:Icon,label,value,note}){
-  return <div className="card"><div className="cardIcon"><Icon size={19}/></div><div><small>{label}</small><b>{value}</b><span>{note}</span></div></div>
-}
-
-function Leads({leads,query,setQuery,status,setStatus,edit,remove,updateStatus}){
-  return <div className="content">
-    <div className="filters">
-      <div className="search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Meklēt uzņēmumu, pilsētu, e-pastu..."/></div>
-      <select value={status} onChange={e=>setStatus(e.target.value)}><option value="ALL">Visi statusi</option>{statuses.map(s=><option key={s}>{s}</option>)}</select>
-      <span>{leads.length} rezultāti</span>
-    </div>
-    <div className="panel tableWrap">
-      <table>
-        <thead><tr><th>Uzņēmums</th><th>Score</th><th>Statuss</th><th>Kontakti</th><th>Demo</th><th>Vērtība</th><th></th></tr></thead>
-        <tbody>{leads.map(l=><tr key={l.id}>
-          <td><button className="company" onClick={()=>edit({...l})}><i>{l.company.slice(0,2).toUpperCase()}</i><div><b>{l.company}</b><small>{l.industry} · {l.city||"—"}</small></div></button></td>
-          <td><div className={"score "+(l.score>=70?"hot":l.score>=40?"warm":"cold")}><b>{l.score}</b><span><i style={{width:`${l.score}%`}}/></span></div></td>
-          <td><select className="status" value={l.status} onChange={e=>updateStatus(l.id,e.target.value)}>{statuses.map(s=><option key={s}>{s}</option>)}</select></td>
-          <td><div className="contact">{l.email&&<a href={`mailto:${l.email}`}><Mail size={14}/></a>}{l.phone&&<a href={`tel:${l.phone}`}><Phone size={14}/></a>}{l.website&&<a href={l.website} target="_blank"><ExternalLink size={14}/></a>}</div></td>
-          <td>{l.demo?<a className="demo" target="_blank" href={l.demo}>Atvērt <ExternalLink size={12}/></a>:<span className="muted">—</span>}</td>
-          <td><b>€{l.value||0}</b></td>
-          <td><div className="rowActions"><button onClick={()=>edit({...l})}><Pencil size={14}/></button><button className="danger" onClick={()=>remove(l.id)}><Trash2 size={14}/></button></div></td>
-        </tr>)}</tbody>
-      </table>
-      {!leads.length&&<div className="empty">Nav atrasts neviens uzņēmums.</div>}
-    </div>
-  </div>
-}
-
-function Modal({lead,setLead,close,save}){
-  const set=(k,v)=>setLead({...lead,[k]:v});
-  return <div className="overlay">
-    <form className="modal" onSubmit={save}>
-      <div className="modalHead"><div><h2>{lead.id?"Rediģēt uzņēmumu":"Jauns uzņēmums"}</h2><p>Saglabā visu informāciju par potenciālo klientu.</p></div><button type="button" onClick={close}><X/></button></div>
-      <div className="form">
-        <Field label="Uzņēmuma nosaukums"><input required value={lead.company} onChange={e=>set("company",e.target.value)}/></Field>
-        <Field label="Nozare"><select value={lead.industry} onChange={e=>set("industry",e.target.value)}>{industries.map(x=><option key={x}>{x}</option>)}</select></Field>
-        <Field label="Pilsēta"><input value={lead.city} onChange={e=>set("city",e.target.value)}/></Field>
-        <Field label="Lead score"><input min="0" max="100" type="number" value={lead.score} onChange={e=>set("score",Number(e.target.value))}/></Field>
-        <Field label="E-pasts"><input type="email" value={lead.email} onChange={e=>set("email",e.target.value)}/></Field>
-        <Field label="Telefons"><input value={lead.phone} onChange={e=>set("phone",e.target.value)}/></Field>
-        <Field label="Mājaslapa"><input placeholder="https://" value={lead.website} onChange={e=>set("website",e.target.value)}/></Field>
-        <Field label="Demo saite"><input placeholder="https://" value={lead.demo} onChange={e=>set("demo",e.target.value)}/></Field>
-        <Field label="Statuss"><select value={lead.status} onChange={e=>set("status",e.target.value)}>{statuses.map(s=><option key={s}>{s}</option>)}</select></Field>
-        <Field label="Darījuma vērtība (€)"><input type="number" value={lead.value} onChange={e=>set("value",Number(e.target.value))}/></Field>
-        <Field label="Pēdējais kontakts"><input type="date" value={lead.lastContact||""} onChange={e=>set("lastContact",e.target.value)}/></Field>
-        <Field label="Nākamais follow-up"><input type="date" value={lead.nextFollowUp||""} onChange={e=>set("nextFollowUp",e.target.value)}/></Field>
-        <div className="wide"><Field label="Piezīmes"><textarea rows="5" value={lead.notes} onChange={e=>set("notes",e.target.value)} placeholder="Kas lapā nav kārtībā? Ko klients atbildēja?"/></Field></div>
-      </div>
-      <div className="modalFoot"><button type="button" className="secondary" onClick={close}>Atcelt</button><button className="primary">Saglabāt</button></div>
-    </form>
-  </div>
-}
-
-function Field({label,children}){return <label className="field"><span>{label}</span>{children}</label>}
-
+function N({icon:Icon,a,on,children}){return <button className={a?"active":""} onClick={on}><Icon size={18}/>{children}</button>}
+function Card({icon:Icon,label,value,note}){return <div className="card"><div className="cardIcon"><Icon size={19}/></div><div><small>{label}</small><b>{value}</b><span>{note}</span></div></div>}
+function Dashboard({stats,leads,members,edit,isAdmin}){return <div className="content"><div className="cards"><Card icon={Building2} label="Klienti" value={stats.total} note="Kopējais lead skaits"/><Card icon={Mail} label="Kontaktēti" value={stats.contacted} note="Saziņa ir sākta"/><Card icon={Target} label="Interesējas" value={stats.hot} note="Silti klienti / Meet"/><Card icon={CheckCircle2} label="Darījumi" value={stats.deals} note={isAdmin?"€"+stats.revenue+" apgrozījums":"Ar priekšapmaksu"}/></div><div className="earnings"><div><Wallet size={20}/><span><b>{isAdmin?"Komandas atlīdzības":"Mana atlīdzība"}</b><small>Skaitās pēc klienta priekšapmaksas.</small></span></div><div className="money"><span>Nopelnīts<b>€{stats.earned}</b></span><span>Izmaksāts<b>€{stats.paid}</b></span><span>Gaida<b>€{stats.pending}</b></span></div></div><div className="grid"><section className="panel"><div className="panelHead"><div><h2>Sales pipeline</h2><p>Kur šobrīd atrodas klienti</p></div></div><div className="pipeline">{statuses.filter(s=>s!=="LOST").map(s=><div className="bar" key={s}><span>{labels[s]}</span><div><i style={{width:(leads.length?Math.max(3,Math.round(leads.filter(l=>l.status===s).length/leads.length*100)):0)+"%"}}/></div><b>{leads.filter(l=>l.status===s).length}</b></div>)}</div></section><section className="panel"><div className="panelHead"><div><h2>Jaunākie klienti</h2><p>Atver, lai turpinātu darbu</p></div></div>{leads.slice(0,6).map(l=>{const o=members.find(m=>m.id===l.ownerId);return <button className="recent" key={l.id} onClick={()=>edit({...l})}><span>{l.company.slice(0,2).toUpperCase()}</span><div><b>{l.company}</b><small>{labels[l.status]} · {o?.name||"—"}</small></div></button>})}</section></div></div>}
+function Leads({leads,members,query,setQuery,status,setStatus,edit,remove,update}){return <div className="content"><div className="filters"><div className="search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Meklēt uzņēmumu..."/></div><select value={status} onChange={e=>setStatus(e.target.value)}><option value="ALL">Visi statusi</option>{statuses.map(s=><option key={s} value={s}>{labels[s]}</option>)}</select><span>{leads.length} rezultāti</span></div><div className="panel tableWrap"><table><thead><tr><th>Uzņēmums</th><th>Atbildīgais</th><th>Statuss</th><th>Mockup</th><th>Kontakti</th><th>Follow-up</th><th>Vērtība</th><th></th></tr></thead><tbody>{leads.map(l=>{const o=members.find(m=>m.id===l.ownerId);return <tr key={l.id}><td><button className="company" onClick={()=>edit({...l})}><i>{l.company.slice(0,2).toUpperCase()}</i><div><b>{l.company}</b><small>{l.industry} · {l.city||"—"} · Score {l.score}</small></div></button></td><td><span className="pill"><UserRound size={12}/>{o?.name||"—"}</span></td><td><select className="status" value={l.status} onChange={e=>update(l.id,e.target.value)}>{statuses.map(s=><option key={s} value={s}>{labels[s]}</option>)}</select></td><td>{l.mockupImage?<button className="thumb" onClick={()=>edit({...l})}><img src={l.mockupImage}/><span>Skatīt</span></button>:<span className="muted">Nav</span>}</td><td><div className="contact">{l.email&&<a href={"mailto:"+l.email}><Mail size={14}/></a>}{l.phone&&<a href={"tel:"+l.phone}><Phone size={14}/></a>}</div></td><td>{l.nextFollowUp?<span className="pill"><CalendarClock size={12}/>{l.nextFollowUp}</span>:<span className="muted">—</span>}</td><td><b>€{l.value}</b></td><td><div className="rowActions"><button onClick={()=>edit({...l})}><Pencil size={14}/></button><button className="danger" onClick={()=>remove(l.id)}><Trash2 size={14}/></button></div></td></tr>})}</tbody></table>{!leads.length&&<div className="empty">Nav klientu.</div>}</div></div>}
+function Tutorial(){return <div className="content"><div className="intro"><div><span className="eyebrow">TAGORIT PLAYBOOK</span><h2>No pirmā lead līdz apmaksātam klientam</h2><p>Ej cauri soļiem pēc kārtas un visu progresu reģistrē klienta profilā.</p></div><div className="priceBox"><small>Standarta piedāvājums</small><b>399 €</b><span>Custom funkcijas → Google Meet ar Tomu</span></div></div><div className="steps">{tutorial.map((s,i)=><div className="step" key={s[0]}><div className="stepNo">{i+1}</div><div><h3>{s[0]}</h3><p>{s[1]}</p><span><Check size={14}/>{s[2]}</span></div></div>)}</div><div className="two"><section className="panel padded"><h3>Ko drīkst solīt pats</h3><ul><li>Standarta uzņēmuma mājaslapa par 399 €</li><li>Responsīvs dizains</li><li>Kontaktforma un pamata SEO</li><li>Esošā satura pārnešana</li><li>2 labojumu cikli</li></ul></section><section className="panel padded"><h3>Kad iesaistīt Tomu</h3><ul><li>Internetveikals / WooCommerce</li><li>Booking vai maksājumi</li><li>Lietotāju konti un datubāzes</li><li>API / ārējās integrācijas</li><li>Nestandarta cena vai termiņš</li></ul></section></div></div>}
+function Scripts({copied,setCopied}){function cp(i,t){navigator.clipboard?.writeText(t);setCopied(i);setTimeout(()=>setCopied(""),1200)}return <div className="content scriptGrid">{scripts.map((s,i)=><section className="panel script" key={s.title}><div className="scriptTop"><div><span className="eyebrow">SAGATAVE {i+1}</span><h2>{s.title}</h2></div><button className="secondary" onClick={()=>cp(i,"Temats: "+s.subject+"\n\n"+s.text)}>{copied===i?<><Check size={14}/>Nokopēts</>:<><Copy size={14}/>Kopēt</>}</button></div><div className="subject"><b>Temats:</b> {s.subject}</div><pre>{s.text}</pre></section>)}</div>}
+function Team({members,setMembers,leads}){const sales=members.filter(m=>m.role==="sales");function add(){setMembers(v=>[...v,{id:crypto.randomUUID(),name:"Jauns partneris",role:"sales",payout:50}])}function upd(id,k,val){setMembers(v=>v.map(m=>m.id===id?{...m,[k]:val}:m))}function rem(id){if(leads.some(l=>l.ownerId===id)){alert("Partnerim vēl ir piesaistīti klienti.");return}if(confirm("Dzēst partneri?"))setMembers(v=>v.filter(m=>m.id!==id))}return <div className="content"><div className="teamHead"><div><h2>Sales partneri</h2><p>Nosaki atlīdzību par apmaksātu klientu.</p></div><button className="primary" onClick={add}><Plus size={15}/>Pievienot partneri</button></div><div className="teamGrid">{sales.map(m=>{const own=leads.filter(l=>l.ownerId===m.id),elig=own.filter(l=>payoutStatuses.includes(l.status)),earned=elig.reduce((a,l)=>a+Number(l.commission??m.payout),0),paid=elig.filter(l=>l.commissionPaid).reduce((a,l)=>a+Number(l.commission??m.payout),0);return <div className="member" key={m.id}><div className="memberTop"><div className="avatar">{m.name.slice(0,1)}</div><div><input value={m.name} onChange={e=>upd(m.id,"name",e.target.value)}/><small>Sales partneris</small></div><button onClick={()=>rem(m.id)}><Trash2 size={14}/></button></div><label className="payout"><span>Atlīdzība par klientu</span><div>€ <input type="number" value={m.payout} onChange={e=>upd(m.id,"payout",Number(e.target.value))}/></div></label><div className="memberStats"><span>Leadi<b>{own.length}</b></span><span>Darījumi<b>{elig.length}</b></span><span>Nopelnīts<b>€{earned}</b></span><span>Gaida<b>€{earned-paid}</b></span></div></div>})}</div></div>}
+function LeadModal({lead,setLead,members,isAdmin,save,close}){const[logType,setLogType]=useState("E-pasts"),[logNote,setLogNote]=useState("");const set=(k,v)=>setLead({...lead,[k]:v});const owner=members.find(m=>m.id===lead.ownerId),commission=lead.commission??owner?.payout??0;function addLog(){if(!logNote.trim())return;const d=new Date().toISOString().slice(0,10),x={id:crypto.randomUUID(),date:d,type:logType,note:logNote.trim()};setLead({...lead,contactLog:[x,...(lead.contactLog||[])],lastContact:d});setLogNote("")}function image(e){const f=e.target.files?.[0];if(!f||!f.type.startsWith("image/"))return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const max=1400,sc=Math.min(1,max/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext("2d").drawImage(im,0,0,c.width,c.height);set("mockupImage",c.toDataURL("image/jpeg",.76))};im.src=r.result};r.readAsDataURL(f)}return <div className="overlay"><form className="modal" onSubmit={save}><div className="modalHead"><div><h2>{lead.id?lead.company:"Jauns klients"}</h2><p>Klienta dati, mockup, saziņas vēsture un atlīdzība.</p></div><button type="button" onClick={close}><X/></button></div><div className="modalBody"><div className="form"><F l="Uzņēmums"><input required value={lead.company} onChange={e=>set("company",e.target.value)}/></F><F l="Nozare"><select value={lead.industry} onChange={e=>set("industry",e.target.value)}>{industries.map(x=><option key={x}>{x}</option>)}</select></F><F l="Pilsēta"><input value={lead.city} onChange={e=>set("city",e.target.value)}/></F><F l="Lead score"><input type="number" min="0" max="100" value={lead.score} onChange={e=>set("score",Number(e.target.value))}/></F><F l="E-pasts"><input value={lead.email} onChange={e=>set("email",e.target.value)}/></F><F l="Telefons"><input value={lead.phone} onChange={e=>set("phone",e.target.value)}/></F><F l="Mājaslapa"><input value={lead.website} onChange={e=>set("website",e.target.value)}/></F><F l="Statuss"><select value={lead.status} onChange={e=>set("status",e.target.value)}>{statuses.map(s=><option key={s} value={s}>{labels[s]}</option>)}</select></F><F l="Darījuma vērtība (€)"><input type="number" value={lead.value} onChange={e=>set("value",Number(e.target.value))}/></F><F l="Atbildīgais"><select disabled={!isAdmin} value={lead.ownerId} onChange={e=>set("ownerId",e.target.value)}>{members.filter(m=>m.role==="sales").map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></F><F l="Nākamais follow-up"><input type="date" value={lead.nextFollowUp||""} onChange={e=>set("nextFollowUp",e.target.value)}/></F>{isAdmin&&<F l="Atlīdzība par šo klientu (€)"><input type="number" placeholder={String(owner?.payout||0)} value={lead.commission??""} onChange={e=>set("commission",e.target.value===""?null:Number(e.target.value))}/></F>}{isAdmin&&<F l="Atlīdzības statuss"><select value={lead.commissionPaid?"paid":"pending"} onChange={e=>set("commissionPaid",e.target.value==="paid")}><option value="pending">Gaida izmaksu</option><option value="paid">Izmaksāts</option></select></F>}<div className="wide"><F l="Piezīmes"><textarea rows="4" value={lead.notes} onChange={e=>set("notes",e.target.value)}/></F></div></div><section className="block"><div className="blockTitle"><FileImage size={18}/><div><b>Nosūtītais mockup</b><small>Bilde, ko nosūtīji klientam.</small></div></div>{lead.mockupImage?<div className="mock"><img src={lead.mockupImage}/><button type="button" className="secondary" onClick={()=>set("mockupImage","")}>Noņemt</button></div>:<label className="uploadZone"><ImageIcon size={25}/><b>Pievienot mockup bildi</b><small>PNG/JPG, attēls tiks samazināts glabāšanai.</small><input hidden type="file" accept="image/*" onChange={image}/></label>}</section><section className="block"><div className="blockTitle"><MessageSquareText size={18}/><div><b>Saziņas vēsture</b><small>E-pasti, zvani un Google Meet.</small></div></div><div className="log"><select value={logType} onChange={e=>setLogType(e.target.value)}><option>E-pasts</option><option>Zvans</option><option>Google Meet</option><option>Follow-up</option><option>Cits</option></select><input value={logNote} onChange={e=>setLogNote(e.target.value)} placeholder="Ko klients pateica?"/><button type="button" className="secondary" onClick={addLog}><Plus size={14}/>Pievienot</button></div><div className="timeline">{(lead.contactLog||[]).map(x=><div className="event" key={x.id}><i/><div><b>{x.type}<span>{x.date}</span></b><p>{x.note}</p></div></div>)}</div></section><div className="commission"><Wallet size={18}/><div><small>Partnera atlīdzība par šo klientu</small><b>€{commission}</b></div><span>{payoutStatuses.includes(lead.status)?(lead.commissionPaid?"Izmaksāts":"Nopelnīts · gaida izmaksu"):"Tiks ieskaitīts pēc priekšapmaksas"}</span></div></div><div className="modalFoot"><button type="button" className="secondary" onClick={close}>Atcelt</button><button className="primary">Saglabāt klientu</button></div></form></div>}
+function F({l,children}){return <label className="field"><span>{l}</span>{children}</label>}
 createRoot(document.getElementById("root")).render(<App/>);
