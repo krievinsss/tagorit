@@ -48,6 +48,11 @@ async function ensureSchema(q){
     commission_cents integer,
     commission_paid boolean NOT NULL DEFAULT false,
     notes text,
+    handoff_summary text,
+    promises text,
+    handoff_requested_at timestamptz,
+    invoice_sent_at timestamptz,
+    deposit_paid_at timestamptz,
     mockup_url text,
     last_contact date,
     next_follow_up date,
@@ -58,6 +63,11 @@ async function ensureSchema(q){
   await q`CREATE INDEX IF NOT EXISTS leads_status_idx ON leads(status)`;
   await q`CREATE UNIQUE INDEX IF NOT EXISTS leads_website_unique ON leads(lower(website)) WHERE website IS NOT NULL AND website <> ''`;
   await q`CREATE UNIQUE INDEX IF NOT EXISTS leads_email_unique ON leads(lower(email)) WHERE email IS NOT NULL AND email <> ''`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS handoff_summary text`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS promises text`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS handoff_requested_at timestamptz`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS invoice_sent_at timestamptz`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS deposit_paid_at timestamptz`;
 
   await q`CREATE TABLE IF NOT EXISTS lead_activity (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
