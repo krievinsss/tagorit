@@ -87,12 +87,30 @@ export const playbookTutorial=[
   "Ja cilvēks skaidri pasaka 'neinteresē', vairs neraksti."
  ],
  checklist:["Klients nav atbildējis citā kanālā","Nav nosūtīti vairāki follow-up vienā dienā","Atjaunināts next follow-up"],
- action:"Ja pēc 2 follow-up nav reakcijas, atzīmē LOST vai piezīmē 'No response'.",
+ action:"Ja pēc 2 follow-up nav reakcijas un ir telefona numurs, pārej uz vienu kvalitatīvu telefona zvanu. Ja numura nav vai pēc zvana nav kontakta, vari aizvērt kā 'No response'.",
  status:"CONTACTED",
- avoid:["Nesūti katru dienu.","Neizmanto vainas sajūtu vai agresīvu tekstu."]
+ avoid:["Nesūti katru dienu.","Neizmanto vainas sajūtu vai agresīvu tekstu.","Pēc vairākiem e-pastiem nezvani atkārtoti katru dienu."]
 },
 {
- id:"qualification",stage:"6. Kvalificē interesi",title:"Saprot, vai tas ir standarta 399 € projekts vai custom",
+ id:"phone-call",stage:"6. Telefona zvans",title:"Pēc e-pastiem vari izdarīt vienu kvalitatīvu zvanu",
+ summary:"Zvans ir pēdējais outreach slānis, nevis agresīva vajāšana. Tā mērķis ir īsi atgādināt par nosūtīto redesign piemēru, noskaidrot, vai cilvēks to redzēja, un saprast, vai vispār ir interese.",
+ bullets:[
+  "Pirms zvana atver klienta profilu un pārlasi, ko nosūtīji, uzņēmuma nosaukumu, mājaslapu un konkrēto problēmu, ko pamanīji.",
+  "Sāc ar savu vārdu, īsu kontekstu un pajautā, vai cilvēkam ir 30 sekundes. Nesāc ar garu pārdošanas monologu.",
+  "Piemini, ka iepriekš nosūtīji e-pastu ar konkrētam uzņēmumam sagatavotu mājaslapas redesign piemēru.",
+  "Galvenais jautājums: vai viņi to redzēja un vai mājaslapas modernizācija viņiem vispār šobrīd ir aktuāla.",
+  "Ja saka 'atsūtiet e-pastā', nepārdod pa telefonu — pārbaudi pareizo e-pastu un nosūti īsu ziņu atkārtoti.",
+  "Ja ir interese, noskaidro tikai svarīgāko: vai runa ir par esošās lapas modernizāciju un vai vajag kādas papildu funkcijas.",
+  "Ja sākas tehniski jautājumi, custom funkcijas, atlaides vai rēķins — apsoli tikai to, ka nodosi Tomam.",
+  "Ja cilvēks skaidri atsaka, pateicies un zvanu beidz. Atkārtoti vairs nezvani."
+ ],
+ checklist:["Atvērts klienta profils","Zini, kuru e-pastu/mockup nosūtīji","Zini uzņēmuma nosaukumu un galveno argumentu","Pēc zvana pierakstīts rezultāts CRM"],
+ action:"Interese → REPLIED/INTERESTED. Tehnisks vai gatavs klients → READY FOR TOM. Skaidrs atteikums → LOST. Neatbildēja → pieraksti zvana mēģinājumu; neveido bezgalīgu zvanu ciklu.",
+ status:"CONTACTED",
+ avoid:["Neizliecies, ka zvans ir par kaut ko citu.","Nesāc strīdēties, ja cilvēks saka, ka nav ieinteresēts.","Nezvani atkārtoti vairākas reizes dienā.","Neprasi maksājumu vai nesūti rēķinu — to dara Toms."]
+},
+{
+ id:"qualification",stage:"7. Kvalificē interesi",title:"Saprot, vai tas ir standarta 399 € projekts vai custom",
  summary:"Pozitīva atbilde vēl nav darījums. Tavs uzdevums ir savākt pietiekami daudz informācijas, lai saprastu, vai vari turpināt pats vai jānodod Tomam.",
  bullets:[
   "Noskaidro: vai esošais saturs paliek, vai ir logo/bildes, cik valodas, vai ir īpašas funkcijas.",
@@ -106,7 +124,7 @@ export const playbookTutorial=[
  avoid:["Nesoli custom funkciju 399 € cenā.","Nesoli custom termiņu bez Toma apstiprinājuma."]
 },
 {
- id:"price",stage:"7. Cena un iebildumi",title:"Skaidro 399 € paketi un netaisi patvaļīgas atlaides",
+ id:"price",stage:"8. Cena un iebildumi",title:"Skaidro 399 € paketi un netaisi patvaļīgas atlaides",
  summary:"Cena jāpasniedz kā skaidrs paketes apjoms. Partnera darbs ir izskaidrot piedāvājumu, nevis improvizēt ar cenām.",
  bullets:[
   "399 € = standarta uzņēmuma mājaslapas modernizācija līdz 5 lapām/sadaļām un 1 valodā.",
@@ -120,7 +138,7 @@ export const playbookTutorial=[
  avoid:["Nesoli atlaidi bez atļaujas.","Neatklāj citu klientu cenas vai iekšējos nosacījumus."]
 },
 {
- id:"handoff",stage:"8. Handoff",title:"Jebkurš klients pirms maksājuma nonāk pie Toma",
+ id:"handoff",stage:"9. Handoff",title:"Jebkurš klients pirms maksājuma nonāk pie Toma",
  summary:"Neatkarīgi no tā, vai tas ir standarta 399 € projekts vai custom darbs, pirms rēķina un priekšapmaksas klients obligāti tiek nodots Tomam.",
  bullets:[
   "Pirms handoff klienta profilā jābūt kontaktam, skaidram prasību/sarunas kopsavilkumam un laukam, ko tieši klientam esi apsolījis.",
@@ -135,7 +153,7 @@ export const playbookTutorial=[
  avoid:["Nenodod klientu bez konteksta.","Neatzīmē READY FOR TOM uz katru vienkāršu jautājumu."]
 },
 {
- id:"deposit",stage:"9. Priekšapmaksa = STOP",title:"Kad priekšapmaksa saņemta, tavs darbs ar klientu ir pabeigts",
+ id:"deposit",stage:"10. Priekšapmaksa = STOP",title:"Kad priekšapmaksa saņemta, tavs darbs ar klientu ir pabeigts",
  summary:"Komisija un veiksmīgs darījums tiek fiksēts tikai tad, kad Toms ir manuāli nosūtījis rēķinu un reāli saņēmis priekšapmaksu. Pēc tam viss projekta darbs ir tikai Toma pusē.",
  bullets:[
   "Pozitīva sarakste nav komisija — vajadzīga reāli saņemta priekšapmaksa.",
@@ -169,6 +187,13 @@ export const salesSituations=[
 {cat:"Custom",title:"Klients grib API, CRM, datubāzi vai lietotāju kontus",what:"Tas jau ir custom web app darbs.",do:["Īsi pieraksti, ko sistēmai jāspēj izdarīt.","Neiedziļinies arhitektūrā ar klientu, ja tas nav tavs uzdevums.","READY FOR TOM."],dont:["Nesaki 'tas ir vienkārši'.","Nesoli cenu vai termiņu."],status:"READY FOR TOM"},
 {cat:"Komunikācija",title:"Klients grib sazvanīties",what:"Ja runa ir par vienkāršu standarta lapu, vari kvalificēt; tehniskas prasības nodod.",do:["Sarunā konkrētu laiku.","Pirms zvana pārlasi klienta profilu.","Ja zvans kļūst tehnisks/custom — pieslēdz Tomu."],dont:["Neej zvanā nesagatavojies.","Nesoli to, ko pēc tam izstrāde nevar izpildīt."],status:"INTERESTED"},
 {cat:"Komunikācija",title:"Klients neatbild pēc pozitīvas intereses",what:"Šis nav tas pats, kas cold follow-up.",do:["Pēc 2–3 darba dienām īsi pajautā, vai nepieciešama vēl kāda informācija.","Ja nav reakcijas vēl 5–7 dienas, nosūti pēdējo mierīgo follow-up.","Atstāj skaidru piezīmi CRM."],dont:["Neraksti katru dienu.","Neuzskati to par apmaksātu darījumu."],status:"INTERESTED"},
+{cat:"Zvans",title:"Uzņēmums neatbild uz zvanu",what:"Viens neatbildēts zvans nav signāls zvanīt atkārtoti ik pēc stundas.",do:["Pieraksti zvana mēģinājumu CRM.","Ja ir balss pasts un vari atstāt īsu profesionālu ziņu, dari to vienu reizi.","Ja jau bijuši 2 follow-up e-pasti, neveido garu zvanu sēriju."],dont:["Nezvani 3–5 reizes vienā dienā.","Neizmanto vairākus numurus, lai panāktu atbildi."],status:"CONTACTED"},
+{cat:"Zvans",title:"Atbild administrators vai sekretāre",what:"Mērķis ir nonākt pie cilvēka, kurš atbild par uzņēmuma mājaslapu, nevis mēģināt pārdot sekretārei.",do:["Īsi pasaki savu vārdu un ka nosūtīji konkrētam uzņēmumam mājaslapas redesign piemēru.","Pajautā, kurš pie viņiem atbild par mājaslapu vai mārketingu.","Ja lūdz atsūtīt e-pastu, pārbaudi pareizo adresi un pateicies."],dont:["Nemēģini apmānīt, ka zvans ir steidzams vai personīgs.","Nespied izpaust privātus kontaktus."],status:"CONTACTED"},
+{cat:"Zvans",title:"Klients saka: “Atsūtiet man e-pastā”",what:"Tas nav atteikums, bet arī nav gatavs darījums.",do:["Pārbaudi, uz kuru e-pastu sūtīt.","Pasaki, ka pārsūtīsi īso redesign piemēru un 399 € standarta paketes informāciju.","Pēc zvana uzreiz nosūti e-pastu un pieraksti to CRM."],dont:["Neturpini 10 minūšu pitch, ja cilvēks skaidri lūdz e-pastu.","Neatzīmē INTERESTED tikai tāpēc, ka piekrita saņemt e-pastu."],status:"CONTACTED"},
+{cat:"Zvans",title:"Klients saka: “Jā, redzēju, izskatās interesanti”",what:"Šeit vari pāriet no cold outreach uz kvalificēšanu.",do:["Pajautā, vai viņi grib modernizēt esošo lapu vai vajag arī jaunas funkcijas.","Īsi izskaidro 399 € standarta paketi.","Ja klientam reāli ir interese virzīties tālāk, pieraksti sarunas kopsavilkumu."],dont:["Neprasi kartes datus vai maksājumu.","Nesūti rēķinu pats."],status:"INTERESTED"},
+{cat:"Zvans",title:"Klients pa telefonu uzreiz prasa cenu",what:"Atbildi īsi un nosacīti, nevis sāc minēt custom cenu.",do:["Pasaki: standarta uzņēmuma mājaslapas modernizācija ir 399 €.","Īsi nosauc galveno scope: līdz 5 lapām, 1 valoda, responsīvs dizains, kontaktforma, pamata SEO, publicēšana, 2 labojumu cikli.","Ja vajag papildfunkcijas, saki, ka cenu precizēs Toms."],dont:["Nesoli custom funkcijas 399 € cenā.","Nekaulējies pa telefonu bez saskaņošanas."],status:"INTERESTED"},
+{cat:"Zvans",title:"Klients saka: “Man tagad nav laika”",what:"Respektē situāciju un padari nākamo soli ļoti vieglu.",do:["Pajautā, vai ērtāk ir nosūtīt īsu e-pastu un vairs netraucēt ar zvanu.","Ja viņš pats nosauc konkrētu laiku, pieraksti callback.","Ja konkrēta laika nav, atstāj komunikāciju e-pastā."],dont:["Neturpini pitch pēc tam, kad cilvēks pateicis, ka nevar runāt.","Neuzstāj uz callback laiku."],status:"CONTACTED"},
+{cat:"Zvans",title:"Klients skaidri saka: “Neinteresē”",what:"Tas ir skaidrs STOP signāls.",do:["Pateicies par laiku.","Atzīmē LOST ar iemeslu.","Vairs neveic follow-up vai atkārtotus zvanus par šo piedāvājumu."],dont:["Nemēģini 'salauzt iebildumu' pēc skaidra atteikuma.","Neprasi, kāpēc viņš negrib, ja cilvēks nevēlas turpināt sarunu."],status:"LOST"},
 {cat:"Process",title:"Klients grib sākt, bet nav materiālu",what:"Darījumu var nofiksēt, bet izstrāde iestrēgs bez satura.",do:["Nosūti vienu strukturētu materiālu sarakstu.","Pajautā, ko drīkst pārnest no esošās lapas.","Ja vajag copywriting/foto, atzīmē to kā papildus vajadzību."],dont:["Nesāc minēt faktus uzņēmuma vietā.","Nevelc ārā saturu no nejaušiem avotiem bez pārbaudes."],status:"DEPOSIT PAID"},
 {cat:"Process",title:"Klients sūta labojumus pa vienam WhatsApp",what:"Jāsavāc vienā ciklā.",do:["Pieklājīgi palūdz visus aktuālos labojumus apvienot vienā ziņā.","Paskaidro, ka tā var ātrāk un precīzāk visu izdarīt.","Pieraksti, kurš cikls tas ir."],dont:["Nesāc skaitīt katru komatu kā atsevišķu ciklu.","Neļauj scope izplūst bezgalīgi."],status:"IN DEVELOPMENT"},
 {cat:"Process",title:"Klients labojumos prasa jaunu funkciju",what:"Jauna funkcija nav parasts labojums.",do:["Atdali vizuālu/satura labojumu no jauna scope.","Pasaki, ka to var izdarīt, bet šī daļa jānovērtē atsevišķi.","Nodod Tomam, ja funkcija tehniska."],dont:["Neiekļauj custom funkciju bez maksas tikai tāpēc, ka klients to nosauca par labojumu."],status:"IN DEVELOPMENT"},
@@ -230,6 +255,43 @@ Ja šobrīd mājaslapas uzlabošana nav aktuāla, viss kārtībā — vairs netr
 Ja tomēr gribat kādreiz pie šī atgriezties, droši saglabājiet manu kontaktu.
 
 Lai veiksmīga diena!`,next:"Ja neatbild — LOST vai CONTACTED ar 'no response'."},
+{cat:"Zvans",title:"Cold call pēc e-pastiem — pamata atklāšana",subject:"Telefona zvans",when:"Pēc cold e-pasta un 1–2 follow-up, ja nav atbildes un ir publiski pieejams uzņēmuma telefons.",text:`Sveiki! Te [VĀRDS].
+
+Es Jums pirms kāda laika nosūtīju e-pastu ar nelielu mājaslapas redesign piemēru tieši Jūsu uzņēmumam.
+
+Vai Jums ir kādas 30 sekundes? Gribēju tikai saprast, vai sanāca to redzēt un vai mājaslapas uzlabošana Jums vispār šobrīd ir aktuāla?`,next:"Ja redzēja un interesē → kvalificē. Ja lūdz e-pastu → pārsūti. Ja skaidri atsaka → LOST."},
+{cat:"Zvans",title:"Ja atbild sekretāre / administrators",subject:"Telefona zvans",when:"Zvanu paceļ cilvēks, kurš, visticamāk, nepieņem lēmumu par mājaslapu.",text:`Sveiki! Te [VĀRDS].
+
+Es Jūsu uzņēmumam nosūtīju nelielu mājaslapas redesign piemēru un gribēju īsi noskaidrot, kurš pie Jums parasti atbild par mājaslapu vai mārketinga jautājumiem.
+
+Man nav nekas steidzams — vienkārši gribētu, lai piemērs nonāk pie pareizā cilvēka.`,next:"Ja iedod kopējo e-pastu vai vārdu — pieraksti CRM. Neprasi privātus kontaktus."},
+{cat:"Zvans",title:"“Atsūtiet e-pastā”",subject:"Telefona zvans",when:"Cilvēks negrib runāt, bet piekrīt saņemt informāciju.",text:`Protams, nekādu problēmu.
+
+Tikai pārbaudīšu — vai [E-PASTS] ir pareizā adrese?
+
+Es tūlīt pārsūtīšu īso redesign piemēru un informāciju par standarta 399 € variantu. Tad varēsiet mierīgi apskatīties, kad ir laiks.`,next:"Nosūti e-pastu uzreiz pēc zvana. Statuss paliek CONTACTED, kamēr nav reālas intereses."},
+{cat:"Zvans",title:"Klients ir ieinteresēts",subject:"Telefona zvans",when:"Cilvēks ir redzējis mockup un grib saprast nākamo soli.",text:`Super.
+
+Lai saprastu, vai paliekam pie standarta 399 € varianta — Jūs gribat galvenokārt modernizēt esošo mājaslapu, vai ir arī kāda jauna funkcija, ko noteikti vajag?
+
+Standarta variantā ir līdz 5 lapām, 1 valoda, responsīvs dizains, esošā satura pārnešana, kontaktforma, pamata SEO, publicēšana un 2 labojumu cikli.
+
+Ja vajag ko specifiskāku, es visu pierakstīšu un nodošu Tomam, kurš precizēs tehnisko pusi.`,next:"Pieraksti prasības. Standarts → INTERESTED; custom/gatavs turpināt → READY FOR TOM."},
+{cat:"Zvans",title:"Klients prasa rēķinu vai grib maksāt",subject:"Telefona zvans",when:"Klients pa telefonu saka, ka ir gatavs sākt.",text:`Super, tad es visu sarunas kopsavilkumu tūlīt nodošu Tomam.
+
+Viņš pārbaudīs, ka viss scope ir korekts, un pats nosūtīs Jums rēķinu un maksājuma informāciju.
+
+Es no savas puses pierakstīšu visu, ko šobrīd sarunājām, lai Jums nekas nav jāstāsta no jauna.`,next:"Aizpildi handoffSummary + promises un READY FOR TOM. Partneris rēķinu nesūta."},
+{cat:"Zvans",title:"Klientam nav laika runāt",subject:"Telefona zvans",when:"Cilvēks paceļ, bet saka, ka ir aizņemts.",text:`Protams, saprotu.
+
+Es tad nevilkšu garumā. Jums jau e-pastā ir nosūtīts redesign piemērs.
+
+Vai labāk, lai es vienkārši pārsūtu to vēlreiz un Jūs apskatāties, kad ir laiks?`,next:"Ja pats piedāvā konkrētu callback laiku — pieraksti. Citādi turpini e-pastā."},
+{cat:"Zvans",title:"Pieklājīgs STOP pēc atteikuma",subject:"Telefona zvans",when:"Klients skaidri pasaka, ka nav ieinteresēts.",text:`Skaidrs, paldies, ka pateicāt.
+
+Tad noteikti vairāk netraucēšu par šo piedāvājumu.
+
+Lai veiksmīga diena!`,next:"LOST. Vairs neveic follow-up par šo piedāvājumu."},
 {cat:"Interese",title:"Klients atbild: “Interesē”",subject:"Re: mājaslapas piemērs",when:"Pirmais pozitīvais reply.",text:`Sveiki!
 
 Super, prieks dzirdēt.
