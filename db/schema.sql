@@ -13,9 +13,12 @@ CREATE TABLE IF NOT EXISTS users (
   agreement_version text,
   agreement_accepted_at timestamptz,
   paper_signed boolean NOT NULL DEFAULT false,
+  independent_outreach boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS independent_outreach boolean NOT NULL DEFAULT false;
 
 CREATE TABLE IF NOT EXISTS sessions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,6 +47,12 @@ CREATE TABLE IF NOT EXISTS leads (
   notes text,
   handoff_summary text,
   promises text,
+  outreach_text text,
+  review_status text NOT NULL DEFAULT 'DRAFT' CHECK (review_status IN ('DRAFT','PENDING','APPROVED','CHANGES_REQUESTED')),
+  review_feedback text,
+  review_requested_at timestamptz,
+  reviewed_at timestamptz,
+  reviewed_by uuid REFERENCES users(id) ON DELETE SET NULL,
   handoff_requested_at timestamptz,
   invoice_sent_at timestamptz,
   deposit_paid_at timestamptz,
@@ -63,6 +72,12 @@ ALTER TABLE leads ADD COLUMN IF NOT EXISTS promises text;
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS handoff_requested_at timestamptz;
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS invoice_sent_at timestamptz;
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS deposit_paid_at timestamptz;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS outreach_text text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS review_status text NOT NULL DEFAULT 'DRAFT';
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS review_feedback text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS review_requested_at timestamptz;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS reviewed_by uuid REFERENCES users(id) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS lead_activity (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
