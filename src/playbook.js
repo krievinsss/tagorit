@@ -5,186 +5,128 @@ export const playbookTutorial=[
  bullets:[
   "Prioritāte: aktīvs uzņēmums ar vecu, neērtu, lēnu vai mobilajā versijā problemātisku mājaslapu.",
   "Labs kandidāts ir uzņēmums, kura pakalpojums ir skaidrs un kam mājaslapa var palīdzēt saņemt vairāk zvanu, pieteikumu vai uzticības.",
-  "Izvairies no mirušiem uzņēmumiem, projektiem bez kontaktinformācijas un uzņēmumiem, kuriem acīmredzami vajag lielu custom sistēmu, nevis 399 € mājaslapu.",
-  "Pirms kontakta pārbaudi Google, Facebook/Instagram un esošo mājaslapu, lai saprastu, vai uzņēmums joprojām darbojas."
+  "Izvairies no mirušiem uzņēmumiem, projektiem bez kontaktinformācijas un uzņēmumiem, kuriem acīmredzami vajag lielu custom sistēmu.",
+  "Pirms kontakta pārbaudi uzņēmuma mājaslapu un publiskos profilus, lai saprastu, vai uzņēmums joprojām darbojas."
  ],
- checklist:["Uzņēmums darbojas","Ir derīgs e-pasts vai telefons","Ir konkrēts iemesls, kāpēc redesign būtu noderīgs","Tagorit nav dublikāta"],
+ checklist:["Uzņēmums darbojas","Ir derīgs e-pasts vai telefons","Ir konkrēts iemesls redesignam","Tagorit nav dublikāta"],
  action:"Izveido klienta ierakstu Tagorit ar uzņēmuma nosaukumu, mājaslapu, kontaktu, pilsētu un īsu piezīmi, kas lapā ir vāji.",
  status:"NEW",
- avoid:["Nesūti 20 uzņēmumiem vienu un to pašu tekstu bez personalizācijas.","Neizdomā problēmas, kuras neesi redzējis.","Neņem cita partnera klientu."]
+ avoid:["Nesūti nejaušus masveida copy-paste e-pastus.","Neizdomā problēmas, kuras neesi redzējis.","Neņem cita partnera klientu."]
 },
 {
  id:"audit",stage:"2. Ātrais audits",title:"Izvērtē esošo mājaslapu 5–10 minūtēs",
- summary:"Tev nav jāraksta 20 lapu audits. Atrodi 2–5 konkrētas lietas, ko klients pats var saprast, ieraugot mockup.",
+ summary:"Atrodi 2–5 konkrētas lietas, ko klients pats sapratīs un ko mockup var parādīt vizuāli.",
  bullets:[
   "Pirmais iespaids: vai 5 sekundēs ir skaidrs, ko uzņēmums dara un kā ar viņiem sazināties?",
   "Mobilā versija: vai teksts, pogas, navigācija un kontaktinformācija ir ērti lietojama telefonā?",
-  "CTA: vai ir skaidras pogas — Zvanīt, Pieteikties, Saņemt piedāvājumu, Rezervēt?",
-  "Uzticība: atsauksmes, reāli foto, komandas/uzņēmuma apraksts, rekvizīti, kontakti.",
-  "Vizuālais: pārāk daudz krāsu, novecojis fonts, pārblīvēts saturs, slikti attēli, neskaidra hierarhija.",
-  "Tehniskais iespaids: SSL, acīmredzami salūzušas sadaļas, lēna ielāde, tukšas lapas."
+  "CTA: vai ir skaidras pogas — Zvanīt, Pieteikties, Saņemt piedāvājumu?",
+  "Uzticība: atsauksmes, reāli foto, uzņēmuma apraksts, rekvizīti, kontakti.",
+  "Vizuālais: pārāk daudz krāsu, novecojis fonts, pārblīvēts saturs, slikta informācijas hierarhija."
  ],
  checklist:["Pierakstīti 2–5 reāli uzlabojumi","Ir skaidrs galvenais CTA","Ir saprotams, ko redesign demonstrēs"],
  action:"Piezīmēs ieraksti īsu auditu, piemēram: 'Mobilajā nav skaidra CTA, novecojis hero, kontakti paslēpti footerī.'",
  status:"NEW",
- avoid:["Nesaki klientam, ka lapa ir 'briesmīga'.","Nesoli SEO rezultātus vai pārdošanas pieaugumu, ko nevar garantēt."]
+ avoid:["Nesaki klientam, ka lapa ir 'briesmīga'.","Nesoli konkrētu pārdošanas vai SEO rezultātu."]
 },
 {
  id:"mockup",stage:"3. Mockup",title:"Uztaisi vizuālu piemēru, kas pārdod ideju",
- summary:"Mockup nav jābūt gala produktam. Tam jāparāda skaidrs pirms/pēc efekts un jāizskatās pietiekami reāli, lai klients saprastu virzienu.",
+ summary:"Mockup nav gala produkts. Tam jāparāda skaidrs pirms/pēc efekts un jāizskatās pietiekami reāli, lai klients saprastu virzienu.",
  bullets:[
   "Saglabā uzņēmuma būtību: logo, nozari, pakalpojumus un galveno kontaktu.",
   "Uztaisi tīru hero ar skaidru virsrakstu un vienu galveno CTA.",
   "Parādi 2–4 svarīgākās sadaļas: pakalpojumi, ieguvumi, atsauksmes, kontakti.",
-  "Ja uzņēmumam ir specifiska funkcija, piemēram, cenu kalkulators, to var vizuāli parādīt, bet nesoli, ka tā ietilpst 399 €, ja tas ir custom.",
-  "Mockupam jābūt vizuāli sakārtotam, ne pārblīvētam."
+  "Ja uzņēmumam ir specifiska funkcija, vari to vizuāli parādīt, bet nesoli, ka tā ietilpst 399 €, ja tas ir custom."
  ],
- checklist:["Mockup izskatās pēc konkrētā uzņēmuma, nevis random template","Nav izdomātas cenas/fakti","Kontaktinformācija nav sajaukta","Attēls pievienots klienta profilam"],
+ checklist:["Mockup izskatās pēc konkrētā uzņēmuma","Nav izdomātas cenas/fakti","Kontaktinformācija nav sajaukta","Attēls pievienots klienta profilam"],
  action:"Pievieno mockup klienta profilā un nomaini statusu uz Mockup gatavs.",
  status:"MOCKUP READY",
- avoid:["Nelieto cita uzņēmuma logo vai atsauksmes.","Neizdomā klientam neesošus sertifikātus, partnerus vai '20 gadu pieredzi'."]
+ avoid:["Nelieto cita uzņēmuma logo vai atsauksmes.","Neizdomā neesošus sertifikātus, partnerus vai pieredzes gadus."]
 },
 {
  id:"first-contact",stage:"4. Pirmā uzruna",title:"Raksti īsi, konkrēti un bez spama sajūtas",
- summary:"Pirmajā ziņā mērķis nav pārdot visu projektu. Mērķis ir panākt, lai cilvēks apskatās mockup un atbild.",
+ summary:"Pirmajā ziņā mērķis nav noslēgt visu projektu. Mērķis ir panākt, lai cilvēks apskata mockup un atbild.",
  bullets:[
   "Pirmajā teikumā parādi, ka tiešām apskatīji tieši viņu uzņēmumu.",
   "Nosauc vienu konkrētu iemeslu, ko pamanīji.",
   "Pasaki, ka uztaisīji redesign piemēru.",
-  "Cena 399 € var būt uzreiz norādīta, lai filtrētu cilvēkus, kam nav atbilstoša budžeta.",
-  "Noslēdz mierīgi — bez spiediena un 'tikai šodien'."
+  "Cena 399 € var būt norādīta uzreiz, lai filtrētu neatbilstošu budžetu.",
+  "Noslēdz mierīgi — bez spiediena."
  ],
- checklist:["Personalizēts uzņēmuma nosaukums vai konteksts","Pievienots mockup/link","Nav drukas kļūdu","Statuss pēc nosūtīšanas nomainīts"],
+ checklist:["Personalizēts konteksts","Pievienots mockup/link","Nav drukas kļūdu","Statuss pēc nosūtīšanas nomainīts"],
  action:"Reģistrē e-pastu saziņas vēsturē, statusu uz Sazināts un follow-up pēc 3–4 dienām.",
  status:"CONTACTED",
- avoid:["Neraksti 'mēs garantējam vairāk klientu'.","Nesūti vairākas ziņas vienā dienā.","Nestrīdies, ja cilvēks atsaka."]
+ avoid:["Neraksti 'garantējam vairāk klientu'.","Nesūti vairākas ziņas vienā dienā.","Nestrīdies, ja cilvēks atsaka."]
 },
 {
  id:"followup",stage:"5. Follow-up",title:"Atgādini, bet nespamo",
- summary:"Liela daļa cilvēku neatbild nevis tāpēc, ka nav intereses, bet tāpēc, ka ziņa pazuda. Viena vai divas pieklājīgas follow-up ziņas ir normālas.",
+ summary:"Viena vai divas pieklājīgas follow-up ziņas ir normālas. Pēc tam sarunu aizver.",
  bullets:[
   "Follow-up #1 pēc aptuveni 3–4 darba dienām.",
   "Ja nav atbildes, follow-up #2 vari sūtīt vēl pēc 5–7 dienām.",
-  "Otrajā follow-up vari aizvērt sarunu: 'ja nav aktuāli, viss kārtībā'.",
+  "Otrajā follow-up vari skaidri pateikt: ja nav aktuāli, viss kārtībā.",
   "Ja cilvēks skaidri pasaka 'neinteresē', vairs neraksti."
  ],
- checklist:["Pārbaudīts, ka klients jau nav atbildējis citā kanālā","Nosūtīts tikai viens follow-up vienā reizē","Atjaunināts next follow-up"],
- action:"Ja pēc 2 follow-up nav reakcijas, vari atstāt klientu CONTACTED vai atzīmēt LOST ar piezīmi 'No response'.",
+ checklist:["Klients nav atbildējis citā kanālā","Nav nosūtīti vairāki follow-up vienā dienā","Atjaunināts next follow-up"],
+ action:"Ja pēc 2 follow-up nav reakcijas, atzīmē LOST vai piezīmē 'No response'.",
  status:"CONTACTED",
- avoid:["Nesūti katru dienu.","Neizmanto vainas sajūtu vai agresīvu tekstu.","Nezvani atkārtoti, ja cilvēks pateicis, ka nevēlas saziņu."]
+ avoid:["Nesūti katru dienu.","Neizmanto vainas sajūtu vai agresīvu tekstu."]
 },
 {
- id:"reply",stage:"6. Atbilde",title:"Kad klients atbild, vispirms saproti, ko viņš īsti grib",
- summary:"Pozitīva atbilde vēl nav darījums. Noskaidro, vai runa ir par standarta 399 € mājaslapu vai custom projektu.",
+ id:"qualification",stage:"6. Kvalificē interesi",title:"Saprot, vai tas ir standarta 399 € projekts vai custom",
+ summary:"Pozitīva atbilde vēl nav darījums. Tavs uzdevums ir savākt pietiekami daudz informācijas, lai saprastu, vai vari turpināt pats vai jānodod Tomam.",
  bullets:[
-  "Ja klients vienkārši saka 'interesē', uzdod 3–4 īsus jautājumus par apjomu.",
   "Noskaidro: vai esošais saturs paliek, vai ir logo/bildes, cik valodas, vai ir īpašas funkcijas.",
-  "Ja prasības paliek vienkāršas — vari skaidrot 399 € paketi.",
-  "Ja parādās e-veikals, booking, maksājumi, lietotāju profili, API, datubāzes, custom kalkulatori — nodod Tomam."
+  "Ja prasības paliek vienkāršas — vari turpināt ar standarta 399 € piedāvājumu.",
+  "Ja parādās e-veikals, booking, maksājumi, lietotāju profili, API, datubāzes vai custom kalkulatori — nodod Tomam.",
+  "Pieraksti visu klienta profilā, lai handoff nav jāstāsta no nulles."
  ],
  checklist:["Saprotams aptuvenais scope","Pierakstītas prasības","Nav apsolīta custom cena","Statuss atjaunināts"],
- action:"Vienkārša interese → INTERESTED. Custom/tehniska saruna → READY FOR TOM.",
+ action:"Standarta interese → INTERESTED. Custom/tehniska saruna → READY FOR TOM.",
  status:"INTERESTED",
- avoid:["Nesaki 'to noteikti iekļausim 399 €', ja neesi pārliecināts.","Nesoli termiņu custom projektam bez saskaņošanas."]
+ avoid:["Nesoli custom funkciju 399 € cenā.","Nesoli custom termiņu bez Toma apstiprinājuma."]
 },
 {
- id:"price",stage:"7. Cena",title:"Kā skaidrot 399 € bez taisnošanās",
- summary:"Cena jāpasniedz kā skaidrs paketes apjoms. Nevajag atvainoties par cenu vai uzreiz pašam piedāvāt atlaidi.",
+ id:"price",stage:"7. Cena un iebildumi",title:"Skaidro 399 € paketi un netaisi patvaļīgas atlaides",
+ summary:"Cena jāpasniedz kā skaidrs paketes apjoms. Partnera darbs ir izskaidrot piedāvājumu, nevis improvizēt ar cenām.",
  bullets:[
-  "399 € = vienkārša uzņēmuma mājaslapas modernizācija ar skaidri definētu scope.",
+  "399 € = standarta uzņēmuma mājaslapas modernizācija.",
   "Standartā: responsīvs dizains, esošā satura pārnešana, kontaktforma, pamata SEO, publicēšana, 2 labojumu cikli.",
   "Papildfunkcijas nav automātiski iekļautas.",
-  "Ja budžets mazāks, risinājums ir samazināt scope, nevis slepeni solīt to pašu par zemāku cenu."
+  "Ja klients grib atlaidi vai citu cenu, nesoli — nodod Tomam."
  ],
- checklist:["Klients saprot, kas ir iekļauts","Nav apsolītas papildfunkcijas","Atlaide nav dota bez admina atļaujas"],
- action:"Ja klients piekrīt standartam, virzi uz vienošanos/priekšapmaksu. Ja kaulējas par custom scope — nodod Tomam.",
+ checklist:["Klients saprot, kas ir iekļauts","Nav apsolītas papildfunkcijas","Atlaide nav dota bez saskaņošanas"],
+ action:"Ja klients piekrīt standartam, virzi uz vienošanos un priekšapmaksu. Ja scope/cena kļūst nestandarta — READY FOR TOM.",
  status:"INTERESTED",
- avoid:["Nesoli atlaidi bez atļaujas.","Nesalīdzini klientu ar citiem klientiem vai neatklāj citu darījumu cenas."]
+ avoid:["Nesoli atlaidi bez atļaujas.","Neatklāj citu klientu cenas vai iekšējos nosacījumus."]
 },
 {
- id:"handoff",stage:"8. Handoff",title:"Kad un kā nodot klientu Tomam",
- summary:"Handoff jānotiek brīdī, kad klients ir reāli ieinteresēts un vajadzīga tehniska saruna, custom cena vai projekta pārņemšana.",
+ id:"handoff",stage:"8. Handoff",title:"Nodod Tomam, kad vajag tehnisku/custom sarunu",
+ summary:"Handoff jānotiek brīdī, kad klients ir reāli ieinteresēts un vajadzīga tehniska saruna, custom cena vai Toma iesaiste.",
  bullets:[
   "Pirms handoff klienta profilā jābūt kontaktam, prasībām, sarakstes kopsavilkumam un tam, ko jau esi apsolījis.",
   "Klientam pasaki, ka pieslēdzas izstrādātājs Toms, kurš precizēs tehnisko daļu.",
-  "Statuss READY FOR TOM nozīmē: klients ir kvalificēts, nevis vienkārši atbildējis 'paldies'.",
-  "Pēc handoff neapsoli jaunus nosacījumus klientam paralēli."
+  "READY FOR TOM nozīmē kvalificētu interesi, nevis vienkārši 'paldies par ziņu'.",
+  "Pēc handoff neapsoli jaunus nosacījumus paralēli."
  ],
- checklist:["Ir īss prasību kopsavilkums","Ir kontaktinformācija","Ir zināms, ko klients grib","Nav pretrunīgu solījumu"],
- action:"Nomaini statusu uz Gatavs pārņemšanai. Admin takeover sadaļā Toms to redzēs.",
+ checklist:["Ir prasību kopsavilkums","Ir kontaktinformācija","Ir zināms, ko klients grib","Nav pretrunīgu solījumu"],
+ action:"Nomaini statusu uz Gatavs pārņemšanai. Toms to redzēs takeover sadaļā.",
  status:"READY FOR TOM",
- avoid:["Nenodod klientu bez konteksta.","Neatzīmē READY FOR TOM tikai tāpēc, ka klients atsūtīja vienu jautājumu."]
+ avoid:["Nenodod klientu bez konteksta.","Neatzīmē READY FOR TOM uz katru vienkāršu jautājumu."]
 },
 {
- id:"deposit",stage:"9. Priekšapmaksa",title:"Darījums skaitās tikai pēc reālas priekšapmaksas",
- summary:"Pozitīva sarakste nav komisija. Komisija rodas tad, kad sistēmā ir apstiprināta klienta priekšapmaksa.",
+ id:"deposit",stage:"9. Priekšapmaksa = STOP",title:"Kad priekšapmaksa saņemta, tavs darbs ar klientu ir pabeigts",
+ summary:"Šī ir stingra procesa robeža. Tiklīdz Toms/admins apstiprina reāli saņemtu priekšapmaksu, klientu un visu tālāko projekta vadību pilnībā pārņem Toms.",
  bullets:[
-  "Standarta modelis: 50% priekšapmaksa, 50% pēc gala versijas apstiprināšanas pirms publicēšanas.",
-  "Pirms priekšapmaksas jābūt skaidram scope un cenai.",
-  "Kad priekšapmaksa saņemta, statusu maina uz DEPOSIT PAID.",
-  "Tieši šajā brīdī sistēma drīkst veidot partnera komisiju un Team Lead override."
+  "Pozitīva sarakste nav komisija — vajadzīga reāli saņemta priekšapmaksa.",
+  "Kad maksājums ir apstiprināts, klients pāriet uz DEPOSIT PAID.",
+  "No šī brīža materiālus, izstrādi, labojumus, gala apmaksu, publicēšanu un uzturēšanu vada Toms.",
+  "Partnerim pēc priekšapmaksas nav jāvada klients un nav jāuzņemas projekta vadītāja loma.",
+  "Tava komisija tiek piesaistīta apmaksātam darījumam; Team Lead override — apakšpartnera apmaksātam darījumam."
  ],
- checklist:["Priekšapmaksa reāli saņemta","Scope ir pierakstīts","Statuss nomainīts pareizi"],
- action:"Atzīmē Priekšapmaksa tikai tad, kad maksājums tiešām ir saņemts/apstiprināts.",
+ checklist:["Priekšapmaksa tiešām saņemta/apstiprināta","CRM pieraksti ir pilni","Toms redz klienta kontekstu","Tu vairs nesoli projekta detaļas klientam"],
+ action:"Pēc DEPOSIT PAID tavs darbs ar šo klientu ir pabeigts. Turpmāk seko tikai savai komisijai sistēmā.",
  status:"DEPOSIT PAID",
- avoid:["Neatzīmē priekšapmaksu tikai uz klienta solījuma pamata.","Nesoli komisijas izmaksas pirms sistēmas/admina apstiprinājuma."]
-},
-{
- id:"materials",stage:"10. Materiāli",title:"Savāc visu, kas vajadzīgs izstrādei",
- summary:"Jo labāk savākti materiāli, jo mazāk haosa izstrādes laikā.",
- bullets:[
-  "Logo labā kvalitātē, vēlams SVG/PNG.",
-  "Kontakti, adrese, rekvizīti, darba laiks.",
-  "Pakalpojumu saraksts un teksti.",
-  "Reālas uzņēmuma bildes, ja pieejamas.",
-  "Sociālie tīkli.",
-  "Piekļuves esošajam hostingam/domēnam tikai tad, kad tās tiešām vajag, un drošā veidā."
- ],
- checklist:["Logo","Kontakti","Pakalpojumi","Bildes","Valodas","Domēna/hostinga situācija zināma"],
- action:"Ja kaut kas trūkst, vienā ziņā nosūti klientam pilnu materiālu sarakstu.",
- status:"IN DEVELOPMENT",
- avoid:["Nelūdz klientam sūtīt paroles publiskā grupā.","Neprasi piekļuves, ja tās vēl nav vajadzīgas."]
-},
-{
- id:"revisions",stage:"11. Labojumi",title:"Kontrolē labojumu ciklus",
- summary:"Standarta paketē ir 2 labojumu cikli. Cikls nozīmē vienu apkopotu klienta feedback komplektu, nevis vienu sīku labojumu.",
- bullets:[
-  "Lūdz klientam salikt visus labojumus vienā ziņā.",
-  "Pēc pirmā cikla uztaisi labojumus un lūdz otro apkopoto sarakstu.",
-  "Ja parādās jaunas sadaļas vai funkcijas, kas nebija sākotnējā scope, tā ir papildus vienošanās.",
-  "Saglabā piezīmes klienta profilā."
- ],
- checklist:["Feedback apkopots","Ir skaidrs, kurš labojumu cikls tas ir","Jauns scope ir atdalīts no labojumiem"],
- action:"Nekļūsti par starpnieku bezgalīgā WhatsApp labojumu plūsmā — visu strukturē.",
- status:"IN DEVELOPMENT",
- avoid:["Nesaki 'jā' katrai jaunai funkcijai kā labojumam.","Nesāc trešo/daudzos ciklus bez saskaņošanas."]
-},
-{
- id:"launch",stage:"12. Publicēšana",title:"Pirms launch viss jāapstiprina",
- summary:"Pirms publicēšanas jābūt apstiprinātai gala versijai un nokārtotam atlikuma maksājumam.",
- bullets:[
-  "Klients apstiprina gala variantu.",
-  "Atlikums ir samaksāts.",
-  "Pārbaudi kontaktformas, saites, telefonu, e-pastu un mobilās versijas pamatplūsmu.",
-  "Pēc publicēšanas nosūti klientam īsu kopsavilkumu un piedāvā uzturēšanu."
- ],
- checklist:["Gala variants apstiprināts","Atlikums saņemts","Forma pārbaudīta","Domēns strādā","HTTPS strādā"],
- action:"Pēc veiksmīgas publicēšanas statusu maini uz WON.",
- status:"WON",
- avoid:["Nepublicē pirms gala apstiprinājuma, ja nav īpašas vienošanās.","Neatstāj testu tekstus vai placeholder kontaktus."]
-},
-{
- id:"maintenance",stage:"13. After-sale",title:"Piedāvā uzturēšanu bez spiediena",
- summary:"Pēc veiksmīga launch klientam ir loģisks nākamais piedāvājums — 30 €/mēn. uzturēšana.",
- bullets:[
-  "Uzturēšanā vari skaidrot: tehniskie atjauninājumi, backup, pamata drošības pieskatīšana, pieejamības pārbaude un nelielas satura izmaiņas noteiktā robežā.",
-  "Skaidri pasaki, ka lieli redesign vai jaunas funkcijas nav iekļautas mēneša uzturēšanā.",
-  "Ja klients atsakās, neuzspied."
- ],
- checklist:["Klients zina cenu","Ir skaidrs, kas ietilpst","Nav apsolīts neierobežots darbs"],
- action:"Piedāvā uzturēšanu pēc launch, kad klients jau ir redzējis gala rezultātu.",
- status:"WON",
- avoid:["Nesaki 'viss jebkad būs bez maksas'.","Neapsoli neierobežotu support par 30 €."]
+ avoid:["Nevāc materiālus klientam pēc priekšapmaksas, ja Toms to nav īpaši lūdzis.","Nevadi labojumus vai launch.","Neapsoli termiņus, papildfunkcijas vai uzturēšanu Toma vietā."]
 }
 ];
 
