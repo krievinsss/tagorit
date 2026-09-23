@@ -204,3 +204,25 @@
 .qaPanel{border-radius:10px;padding:12px 13px;margin-bottom:15px;border:1px solid #e0e3ea;background:#f8f9fb}.qaPanel.required{background:#fffaf1;border-color:#eedfbf}.qaPanel.independent{background:#eff9f3;border-color:#d3eadb}.qaHead{display:flex;align-items:center;gap:8px}.qaHead>div{display:grid;flex:1}.qaHead b{font-size:10px}.qaHead small{font-size:8.5px;color:#6f798b;margin-top:2px}.qaFeedback{margin-top:10px;background:#fff1f2;border:1px solid #efcdd1;border-radius:8px;padding:9px 10px}.qaFeedback b{font-size:8px;color:#a34754}.qaFeedback p{font-size:9px;color:#6b5960;margin:3px 0 0}.qaSubmit{margin-top:10px}.qaReviewActions{display:grid;grid-template-columns:1fr auto auto;gap:7px;margin-top:10px}.qaReviewActions input{border:1px solid #dfe3ea;border-radius:8px;padding:9px 10px;font-size:9px}.outreachEditor{width:100%;border:1px solid #dfe3ea;border-radius:9px;padding:11px 12px;font:inherit;font-size:10px;line-height:1.55;resize:vertical;background:#fff}.outreachEditor:disabled{background:#f7f8fa;color:#657085}.compactEmpty{padding:18px}.commentComposer{grid-template-columns:1fr auto!important}
 @media(max-width:1150px){.workerControlGrid{grid-template-columns:repeat(2,1fr)}.controlCards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:850px){.teamControlHero{align-items:flex-start;flex-direction:column}.teamControlScore{min-width:0;width:100%}.alertGrid,.workerControlGrid,.controlCards{grid-template-columns:1fr}.reviewRow{grid-template-columns:80px 1fr}.reviewRow>img,.reviewPlaceholder{width:80px;height:58px}.reviewActions{grid-column:1/-1;justify-content:flex-start}.controlLeadRow{grid-template-columns:50px 1fr}.controlLeadRow img,.miniMock{width:50px;height:36px}.controlLeadRow>.reviewBadge,.controlLeadRow>.followLate,.controlLeadRow>.followOk{grid-column:2;justify-self:start}.qaReviewActions{grid-template-columns:1fr}.commentComposer{grid-template-columns:1fr!important}}
+
+
+/* Company dedupe, qualification and reactivation */
+.companyLookup{border:1px solid #dfe3ea;background:#f8f9fb;border-radius:10px;margin-bottom:14px;overflow:hidden}
+.lookupTitle{display:flex;gap:9px;align-items:center;padding:11px 12px;border-bottom:1px solid #e7eaf0;background:#fff}
+.lookupTitle>div{display:grid}.lookupTitle b{font-size:10px}.lookupTitle small{font-size:8.5px;color:#7d8798;margin-top:2px}
+.lookupMatch{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 12px;border-top:1px solid #eceef2;background:#fff}
+.lookupMatch:first-of-type{border-top:0}.lookupMatch>div{display:grid;min-width:0}.lookupMatch b{font-size:10px}.lookupMatch small{font-size:8.5px;color:#7f8999;margin-top:2px}
+.lookupMatch p{font-size:8.5px;line-height:1.4;margin:5px 0 0;color:#7a5960}.lookupMatch.ready{background:#eff9f3}.lookupMatch.ready p{color:#2f7954}
+.lookupMatch.blocked{background:#fff1f2}.lookupMatch.blocked p{color:#a44754;font-weight:700}
+.lookupMatch button{white-space:nowrap}
+.offerGate{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid #dfe3ea;border-radius:9px;padding:11px 12px}
+.offerGate>div{display:grid}.offerGate b{font-size:10px}.offerGate small{font-size:8.5px;line-height:1.45;margin-top:2px}
+.offerGate>span{font-size:8px;font-weight:800;border-radius:999px;padding:5px 7px;white-space:nowrap}
+.offerGate.standard{background:#eff9f3;border-color:#d1ead9}.offerGate.standard b{color:#286f4d}.offerGate.standard small{color:#587666}.offerGate.standard>span{background:#dff2e6;color:#26704c}
+.offerGate.custom{background:#fff6ea;border-color:#efdcb7}.offerGate.custom b{color:#915d18}.offerGate.custom small{color:#786851}.offerGate.custom>span{background:#f7e5c5;color:#8a5a19}
+.lostState{display:grid;border:1px solid #e4d5d7;background:#fff5f6;border-radius:9px;padding:10px 11px}
+.lostState b{font-size:10px;color:#9a4652}.lostState small{font-size:8.5px;color:#756269;margin-top:3px}
+@media(max-width:720px){.lookupMatch,.offerGate{align-items:flex-start;flex-direction:column}.lookupMatch button{width:100%}}
+
+.scopeHardStop{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding:11px 12px;border-radius:9px;background:#fff3e6;border:1px solid #eed9b3;color:#825819}
+.scopeHardStop svg{flex:none;margin-top:1px}.scopeHardStop>div{display:grid}.scopeHardStop b{font-size:10px}.scopeHardStop span{font-size:9px;line-height:1.5;margin-top:3px;color:#75654f}

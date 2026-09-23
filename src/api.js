@@ -19,6 +19,7 @@ export const api={
  sendMessage:data=>request("/api/messages",{method:"POST",body:JSON.stringify(data)}),
  support:()=>request("/api/support"),
  supportAction:data=>request("/api/support",{method:"POST",body:JSON.stringify(data)}),
+ lookupLeads:query=>request("/api/leads?lookup="+encodeURIComponent(query)),
  createLead:data=>request("/api/leads",{method:"POST",body:JSON.stringify(data)}),
  updateLead:data=>request("/api/leads",{method:"PUT",body:JSON.stringify(data)}),
  deleteLead:id=>request("/api/leads?id="+encodeURIComponent(id),{method:"DELETE"})
