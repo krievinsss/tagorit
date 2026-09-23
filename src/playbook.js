@@ -1,3 +1,23 @@
+export const package399={
+ price:399,
+ pages:"Līdz 5 lapām/sadaļām",
+ language:"1 valoda",
+ includes:["Responsīvs dizains","Esošā satura pārnešana līdz 5 lapām","Kontaktforma","Pamata SEO","Publicēšana uz klienta esošā domēna","Esošā domēna pieslēgšana/migrācijas tehniskais darbs","2 apkopoti labojumu cikli"],
+ excludes:["E-veikals / WooCommerce","Booking vai rezervāciju sistēma","Online maksājumi","Lietotāju konti un datubāzes","API un custom integrācijas","Sarežģīti kalkulatori","Profesionāls copywriting vai fotografēšana","Papildu valodas","Hostings, jaunas domēna izmaksas un maksas licences/spraudņi"],
+ contentRule:"Esošais saturs tiek pārnests un noformatēts saprātīgā apjomā; pilnīga tekstu pārrakstīšana vai jauna satura izstrāde nav iekļauta.",
+ timeline:"Orientējoši 3–7 darba dienas pēc priekšapmaksas un visu nepieciešamo materiālu saņemšanas."
+};
+
+export const businessRules={
+ leadOwnership:"Lead pieder tam partnerim, kurš to pirmais korekti reģistrējis Tagorit. Dublikātu pārņemt nedrīkst.",
+ inactivity:"Ja 14 dienas nav aktivitātes, Team Lead var pārņemt sava tiešā apakšpartnera lead, bet admins var to pārdalīt.",
+ commission:"Sales Partner standarta komisija ir 50 € par klientu tikai pēc reāli saņemtas priekšapmaksas.",
+ override:"Team Lead saņem 10 € tikai par sava tiešā apakšpartnera apmaksātu klientu. Par dziļākiem līmeņiem override nav.",
+ payouts:"Komisijas tiek apkopotas un izmaksātas 1× mēnesī. Līdz izmaksai tās ir Pending.",
+ refund:"Ja priekšapmaksa tiek pilnībā atmaksāta pirms darba sākšanas, neizmaksātā komisija kļūst Void; ja komisija jau izmaksāta, korekcija tiek veikta nākamajā izmaksā.",
+ invoice:"Jebkurš klients pirms maksājuma tiek nodots Tomam. Rēķinu Toms izsūta manuāli; partneris pats rēķinus nesūta."
+};
+
 export const playbookTutorial=[
 {
  id:"lead-hunting",stage:"1. Lead hunting",title:"Atrodi uzņēmumus, kuriem redesign tiešām var palīdzēt",
@@ -89,39 +109,41 @@ export const playbookTutorial=[
  id:"price",stage:"7. Cena un iebildumi",title:"Skaidro 399 € paketi un netaisi patvaļīgas atlaides",
  summary:"Cena jāpasniedz kā skaidrs paketes apjoms. Partnera darbs ir izskaidrot piedāvājumu, nevis improvizēt ar cenām.",
  bullets:[
-  "399 € = standarta uzņēmuma mājaslapas modernizācija.",
-  "Standartā: responsīvs dizains, esošā satura pārnešana, kontaktforma, pamata SEO, publicēšana, 2 labojumu cikli.",
-  "Papildfunkcijas nav automātiski iekļautas.",
+  "399 € = standarta uzņēmuma mājaslapas modernizācija līdz 5 lapām/sadaļām un 1 valodā.",
+  "Standartā: responsīvs dizains, esošā satura pārnešana, kontaktforma, pamata SEO, publicēšana uz esošā domēna un 2 labojumu cikli.",
+  "Hostings, papildu valodas, maksas licences un custom funkcijas tiek rēķinātas atsevišķi.",
   "Ja klients grib atlaidi vai citu cenu, nesoli — nodod Tomam."
  ],
  checklist:["Klients saprot, kas ir iekļauts","Nav apsolītas papildfunkcijas","Atlaide nav dota bez saskaņošanas"],
- action:"Ja klients piekrīt standartam, virzi uz vienošanos un priekšapmaksu. Ja scope/cena kļūst nestandarta — READY FOR TOM.",
+ action:"Ja klients piekrīt piedāvājumam, aizpildi handoff kopsavilkumu un atzīmē READY FOR TOM. Toms pats nosūtīs rēķinu. Ja scope/cena ir nestandarta, arī nodod Tomam.",
  status:"INTERESTED",
  avoid:["Nesoli atlaidi bez atļaujas.","Neatklāj citu klientu cenas vai iekšējos nosacījumus."]
 },
 {
- id:"handoff",stage:"8. Handoff",title:"Nodod Tomam, kad vajag tehnisku/custom sarunu",
- summary:"Handoff jānotiek brīdī, kad klients ir reāli ieinteresēts un vajadzīga tehniska saruna, custom cena vai Toma iesaiste.",
+ id:"handoff",stage:"8. Handoff",title:"Jebkurš klients pirms maksājuma nonāk pie Toma",
+ summary:"Neatkarīgi no tā, vai tas ir standarta 399 € projekts vai custom darbs, pirms rēķina un priekšapmaksas klients obligāti tiek nodots Tomam.",
  bullets:[
-  "Pirms handoff klienta profilā jābūt kontaktam, prasībām, sarakstes kopsavilkumam un tam, ko jau esi apsolījis.",
-  "Klientam pasaki, ka pieslēdzas izstrādātājs Toms, kurš precizēs tehnisko daļu.",
-  "READY FOR TOM nozīmē kvalificētu interesi, nevis vienkārši 'paldies par ziņu'.",
-  "Pēc handoff neapsoli jaunus nosacījumus paralēli."
+  "Pirms handoff klienta profilā jābūt kontaktam, skaidram prasību/sarunas kopsavilkumam un laukam, ko tieši klientam esi apsolījis.",
+  "Ja nekas papildus nav solīts, ieraksti tieši: 'Nekas papildus nav solīts'.",
+  "Standarta klientam Toms pārbauda scope un manuāli nosūta rēķinu.",
+  "Custom klientam Toms vajadzības gadījumā vispirms sarunā Google Meet, tad sagatavo cenu/rēķinu.",
+  "Partneris pats rēķinu nesūta un pēc handoff nemaina nosacījumus bez Toma."
  ],
  checklist:["Ir prasību kopsavilkums","Ir kontaktinformācija","Ir zināms, ko klients grib","Nav pretrunīgu solījumu"],
- action:"Nomaini statusu uz Gatavs pārņemšanai. Toms to redzēs takeover sadaļā.",
+ action:"Nomaini statusu uz Gatavs pārņemšanai. No šī brīža Toms pārņem rēķinu un maksājuma procesu; tu seko rezultātam un iesaisties tikai tad, ja Toms to palūdz.",
  status:"READY FOR TOM",
  avoid:["Nenodod klientu bez konteksta.","Neatzīmē READY FOR TOM uz katru vienkāršu jautājumu."]
 },
 {
  id:"deposit",stage:"9. Priekšapmaksa = STOP",title:"Kad priekšapmaksa saņemta, tavs darbs ar klientu ir pabeigts",
- summary:"Šī ir stingra procesa robeža. Tiklīdz Toms/admins apstiprina reāli saņemtu priekšapmaksu, klientu un visu tālāko projekta vadību pilnībā pārņem Toms.",
+ summary:"Komisija un veiksmīgs darījums tiek fiksēts tikai tad, kad Toms ir manuāli nosūtījis rēķinu un reāli saņēmis priekšapmaksu. Pēc tam viss projekta darbs ir tikai Toma pusē.",
  bullets:[
   "Pozitīva sarakste nav komisija — vajadzīga reāli saņemta priekšapmaksa.",
-  "Kad maksājums ir apstiprināts, klients pāriet uz DEPOSIT PAID.",
+  "Toms vispirms atzīmē Rēķins nosūtīts, un tikai pēc reālas naudas saņemšanas — DEPOSIT PAID.",
   "No šī brīža materiālus, izstrādi, labojumus, gala apmaksu, publicēšanu un uzturēšanu vada Toms.",
   "Partnerim pēc priekšapmaksas nav jāvada klients un nav jāuzņemas projekta vadītāja loma.",
-  "Tava komisija tiek piesaistīta apmaksātam darījumam; Team Lead override — apakšpartnera apmaksātam darījumam."
+  "Sales Partner komisija ir 50 €; Team Lead saņem 10 € override tikai par sava tiešā apakšpartnera apmaksātu klientu.",
+  "Komisijas tiek apkopotas izmaksai vienu reizi mēnesī."
  ],
  checklist:["Priekšapmaksa tiešām saņemta/apstiprināta","CRM pieraksti ir pilni","Toms redz klienta kontekstu","Tu vairs nesoli projekta detaļas klientam"],
  action:"Pēc DEPOSIT PAID tavs darbs ar šo klientu ir pabeigts. Turpmāk seko tikai savai komisijai sistēmā.",
