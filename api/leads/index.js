@@ -6,7 +6,7 @@ const allowed=["NEW","MOCKUP READY","CONTACTED","REPLIED","INTERESTED","READY FO
 const sellerStatuses=["NEW","MOCKUP READY","CONTACTED","REPLIED","INTERESTED","READY FOR TOM","LOST"];
 const lockedForSeller=["READY FOR TOM","MEETING","INVOICE SENT","DEPOSIT PAID","IN DEVELOPMENT","WON"];
 
-async function canOwn(q,user,ownerId){
+async function canAccess(q,user,ownerId){
  if(user.role==="admin")return true;
  if(ownerId===user.id)return true;
  if(user.role==="team_lead"){
@@ -14,6 +14,17 @@ async function canOwn(q,user,ownerId){
   return !!rows[0];
  }
  return false;
+}
+
+async function isDirectChild(q,user,ownerId){
+ if(user.role!=="team_lead")return false;
+ const rows=await q`SELECT 1 FROM users WHERE id=${ownerId} AND parent_user_id=${user.id} AND role='sales' LIMIT 1`;
+ return !!rows[0];
+}
+
+async function ownerInfo(q,ownerId){
+ const rows=await q`SELECT id,role,parent_user_id,independent_outreach FROM users WHERE id=${ownerId} LIMIT 1`;
+ return rows[0]||null;
 }
 
 function normalizeDomain(v=""){
@@ -30,15 +41,32 @@ function inactiveDays(l){
  return Math.max(0,Math.floor((Date.now()-at)/86400000));
 }
 
-function out(l){
+function parseContact(a){
+ let d={};try{d=JSON.parse(a.body)}catch{}
+ return{id:a.id,date:d.date||String(a.created_at).slice(0,10),type:d.type||"Cits",note:d.note||a.body,actorId:a.actor_id,at:a.created_at};
+}
+
+async function activitiesFor(q,leadId){
+ const rows=await q`SELECT * FROM lead_activity WHERE lead_id=${leadId} ORDER BY created_at DESC`;
+ return{
+  contactLog:rows.filter(a=>a.activity_type==="CONTACT").map(parseContact),
+  adminComments:rows.filter(a=>a.activity_type==="COMMENT").map(a=>({id:a.id,body:a.body,actorId:a.actor_id,at:a.created_at}))
+ };
+}
+
+async function out(q,l){
+ const acts=await activitiesFor(q,l.id);
  return{
   id:l.id,company:l.company,industry:l.industry||"",city:l.city||"",website:l.website||"",email:l.email||"",phone:l.phone||"",
   score:l.score,status:l.status,value:Number(l.value_cents||0)/100,notes:l.notes||"",
-  handoffSummary:l.handoff_summary||"",promises:l.promises||"",
+  handoffSummary:l.handoff_summary||"",promises:l.promises||"",outreachText:l.outreach_text||"",
+  reviewStatus:l.review_status||"DRAFT",reviewFeedback:l.review_feedback||"",reviewRequestedAt:l.review_requested_at||null,
+  reviewedAt:l.reviewed_at||null,reviewedBy:l.reviewed_by||null,
   handoffRequestedAt:l.handoff_requested_at||null,invoiceSentAt:l.invoice_sent_at||null,depositPaidAt:l.deposit_paid_at||null,
   lastContact:l.last_contact||"",nextFollowUp:l.next_follow_up||"",ownerId:l.owner_id,
   commission:l.commission_cents==null?null:Number(l.commission_cents)/100,commissionPaid:l.commission_paid,
-  mockupImage:l.mockup_url||"",contactLog:[],adminComments:[],inactiveDays:inactiveDays(l)
+  mockupImage:l.mockup_url||"",createdAt:l.created_at,updatedAt:l.updated_at,inactiveDays:inactiveDays(l),
+  ...acts
  };
 }
 
@@ -77,6 +105,11 @@ async function createCommissions(q,lead,userCommissionCents){
  return saleAmount;
 }
 
+async function canReview(q,user,current){
+ if(user.role==="admin")return true;
+ return isDirectChild(q,user,current.owner_id);
+}
+
 export default async function handler(req,res){
  try{
   const user=await requireUser(req,res);if(!user)return;
@@ -84,22 +117,23 @@ export default async function handler(req,res){
 
   if(req.method==="POST"){
    const d=await body(req),ownerId=user.role==="admin"?(d.ownerId||user.id):user.id;
-   if(!(await canOwn(q,user,ownerId)))return json(res,403,{error:"Invalid owner"});
+   if(!(await canAccess(q,user,ownerId)))return json(res,403,{error:"Invalid owner"});
    if(!d.company?.trim())return json(res,400,{error:"Uzņēmuma nosaukums ir obligāts"});
    const dup=await duplicateLead(q,d);
    if(dup)return json(res,409,{error:"Šis uzņēmums jau eksistē sistēmā: "+dup.company});
    const requestedStatus=allowed.includes(d.status)?d.status:"NEW";
    if(user.role!=="admin"&&!sellerStatuses.includes(requestedStatus))return json(res,403,{error:"Šo statusu drīkst iestatīt tikai admins"});
-   const rows=await q`INSERT INTO leads(owner_id,company,industry,city,website,email,phone,score,status,value_cents,notes,handoff_summary,promises,last_contact,next_follow_up)
-    VALUES(${ownerId},${d.company.trim()},${d.industry||null},${d.city||null},${d.website||null},${d.email||null},${d.phone||null},${Number(d.score||50)},${requestedStatus},${Math.round(Number(d.value||399)*100)},${d.notes||null},${d.handoffSummary||null},${d.promises||null},${d.lastContact||null},${d.nextFollowUp||null}) RETURNING *`;
+   const rows=await q`INSERT INTO leads(owner_id,company,industry,city,website,email,phone,score,status,value_cents,notes,handoff_summary,promises,outreach_text,mockup_url,last_contact,next_follow_up)
+    VALUES(${ownerId},${d.company.trim()},${d.industry||null},${d.city||null},${d.website||null},${d.email||null},${d.phone||null},${Number(d.score||50)},${requestedStatus},${Math.round(Number(d.value||399)*100)},${d.notes||null},${d.handoffSummary||null},${d.promises||null},${d.outreachText||null},${d.mockupImage||null},${d.lastContact||null},${d.nextFollowUp||null}) RETURNING *`;
    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id) VALUES(${user.id},'LEAD_CREATED','lead',${rows[0].id})`;
-   return json(res,201,{lead:out(rows[0])});
+   return json(res,201,{lead:await out(q,rows[0])});
   }
 
   if(req.method==="PUT"){
    const d=await body(req);if(!d.id)return json(res,400,{error:"Missing lead id"});
    const current=(await q`SELECT * FROM leads WHERE id=${d.id} LIMIT 1`)[0];
    if(!current)return json(res,404,{error:"Lead not found"});
+   if(!(await canAccess(q,user,current.owner_id)))return json(res,403,{error:"Forbidden"});
 
    if(d.action==="CLAIM_INACTIVE"){
     if(!["admin","team_lead"].includes(user.role))return json(res,403,{error:"Forbidden"});
@@ -107,8 +141,7 @@ export default async function handler(req,res){
     if(inactiveDays(current)<14)return json(res,400,{error:"Klients vēl nav neaktīvs 14 dienas"});
     let ownerId=user.id;
     if(user.role==="team_lead"){
-     const child=(await q`SELECT 1 FROM users WHERE id=${current.owner_id} AND parent_user_id=${user.id} LIMIT 1`)[0];
-     if(!child)return json(res,403,{error:"Vari pārņemt tikai sava tiešā apakšpartnera neaktīvu klientu"});
+     if(!(await isDirectChild(q,user,current.owner_id)))return json(res,403,{error:"Vari pārņemt tikai sava tiešā apakšpartnera neaktīvu klientu"});
     }else if(d.ownerId){
      const target=(await q`SELECT id FROM users WHERE id=${d.ownerId} AND active=true AND role<>'admin' LIMIT 1`)[0];
      if(!target)return json(res,400,{error:"Nederīgs jaunais atbildīgais"});
@@ -117,10 +150,66 @@ export default async function handler(req,res){
     const rows=await q`UPDATE leads SET owner_id=${ownerId},updated_at=now() WHERE id=${d.id} RETURNING *`;
     await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id,details)
       VALUES(${user.id},'LEAD_RECLAIMED','lead',${d.id},${JSON.stringify({previousOwner:current.owner_id,newOwner:ownerId})}::jsonb)`;
-    return json(res,200,{lead:out(rows[0])});
+    return json(res,200,{lead:await out(q,rows[0])});
    }
 
-   if(!(await canOwn(q,user,current.owner_id)))return json(res,403,{error:"Forbidden"});
+   if(d.action==="ADD_CONTACT"){
+    if(user.role==="team_lead"&&current.owner_id!==user.id)return json(res,403,{error:"Team Lead nevar rakstīt saziņu cita partnera vietā"});
+    if(user.role!=="admin"&&lockedForSeller.includes(current.status))return json(res,403,{error:"Klients jau ir nodots Tomam"});
+    const type=String(d.type||"Cits").slice(0,40),note=String(d.note||"").trim();
+    if(!note)return json(res,400,{error:"Ieraksti saziņas piezīmi"});
+    const date=String(d.date||new Date().toISOString().slice(0,10));
+    await q`INSERT INTO lead_activity(lead_id,actor_id,activity_type,body,visibility)
+      VALUES(${d.id},${user.id},'CONTACT',${JSON.stringify({date,type,note})},'team')`;
+    const rows=await q`UPDATE leads SET last_contact=${date},updated_at=now() WHERE id=${d.id} RETURNING *`;
+    return json(res,200,{lead:await out(q,rows[0])});
+   }
+
+   if(d.action==="ADD_COMMENT"){
+    if(!(await canReview(q,user,current)))return json(res,403,{error:"Komentārus var pievienot admins vai konkrētā partnera Team Lead"});
+    const note=String(d.note||"").trim();
+    if(!note)return json(res,400,{error:"Komentārs ir tukšs"});
+    await q`INSERT INTO lead_activity(lead_id,actor_id,activity_type,body,visibility)
+      VALUES(${d.id},${user.id},'COMMENT',${note},'team')`;
+    const rows=await q`UPDATE leads SET updated_at=now() WHERE id=${d.id} RETURNING *`;
+    return json(res,200,{lead:await out(q,rows[0])});
+   }
+
+   if(d.action==="SUBMIT_REVIEW"){
+    if(current.owner_id!==user.id)return json(res,403,{error:"Pārbaudei lead var iesniegt tikai tā īpašnieks"});
+    const owner=await ownerInfo(q,current.owner_id);
+    if(!owner||owner.role!=="sales")return json(res,400,{error:"Šim lietotājam Team Lead pārbaude nav nepieciešama"});
+    if(owner.independent_outreach)return json(res,400,{error:"Tev ir ieslēgts patstāvīgs outreach režīms"});
+    const mockup=String(d.mockupImage??current.mockup_url??"");
+    const outreach=String(d.outreachText??current.outreach_text??"").trim();
+    if(!mockup)return json(res,400,{error:"Pirms pārbaudes pievieno mockup"});
+    if(outreach.length<20)return json(res,400,{error:"Pirms pārbaudes pievieno klientam paredzēto e-pasta tekstu"});
+    const rows=await q`UPDATE leads SET mockup_url=${mockup},outreach_text=${outreach},review_status='PENDING',review_feedback=NULL,review_requested_at=now(),reviewed_at=NULL,reviewed_by=NULL,updated_at=now() WHERE id=${d.id} RETURNING *`;
+    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id) VALUES(${user.id},'LEAD_REVIEW_SUBMITTED','lead',${d.id})`;
+    return json(res,200,{lead:await out(q,rows[0])});
+   }
+
+   if(d.action==="REVIEW_APPROVE"){
+    if(!(await canReview(q,user,current)))return json(res,403,{error:"Šo mockup var apstiprināt tikai Team Lead vai admins"});
+    if(current.review_status!=="PENDING")return json(res,400,{error:"Šis lead šobrīd negaida pārbaudi"});
+    const rows=await q`UPDATE leads SET review_status='APPROVED',review_feedback=NULL,reviewed_at=now(),reviewed_by=${user.id},updated_at=now() WHERE id=${d.id} RETURNING *`;
+    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id) VALUES(${user.id},'LEAD_REVIEW_APPROVED','lead',${d.id})`;
+    return json(res,200,{lead:await out(q,rows[0])});
+   }
+
+   if(d.action==="REVIEW_CHANGES"){
+    if(!(await canReview(q,user,current)))return json(res,403,{error:"Šo mockup var pārskatīt tikai Team Lead vai admins"});
+    const feedback=String(d.feedback||"").trim();
+    if(feedback.length<3)return json(res,400,{error:"Uzraksti, kas jāizlabo"});
+    const rows=await q`UPDATE leads SET review_status='CHANGES_REQUESTED',review_feedback=${feedback},reviewed_at=now(),reviewed_by=${user.id},updated_at=now() WHERE id=${d.id} RETURNING *`;
+    await q`INSERT INTO lead_activity(lead_id,actor_id,activity_type,body,visibility) VALUES(${d.id},${user.id},'COMMENT',${"QA: "+feedback},'team')`;
+    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id) VALUES(${user.id},'LEAD_REVIEW_CHANGES','lead',${d.id})`;
+    return json(res,200,{lead:await out(q,rows[0])});
+   }
+
+   if(user.role==="team_lead"&&current.owner_id!==user.id){
+    return json(res,403,{error:"Apakšpartnera lead vari pārskatīt un komentēt, bet ne rediģēt viņa vietā"});
+   }
    if(user.role!=="admin"&&lockedForSeller.includes(current.status)){
     return json(res,403,{error:"Klients jau ir nodots Tomam. No šī brīža ieraksts partnerim ir tikai apskatei."});
    }
@@ -128,6 +217,11 @@ export default async function handler(req,res){
    const requestedStatus=allowed.includes(d.status)?d.status:current.status;
    if(user.role!=="admin"&&!sellerStatuses.includes(requestedStatus)){
     return json(res,403,{error:"Šo statusu drīkst iestatīt tikai admins"});
+   }
+
+   const owner=await ownerInfo(q,current.owner_id);
+   if(user.role!=="admin"&&requestedStatus==="CONTACTED"&&current.status!=="CONTACTED"&&owner?.role==="sales"&&!owner.independent_outreach&&current.review_status!=="APPROVED"){
+    return json(res,400,{error:"Pirms pirmā e-pasta nosūtīšanas Team Lead jāapstiprina mockup un e-pasta teksts"});
    }
 
    if(requestedStatus==="READY FOR TOM"&&current.status!=="READY FOR TOM"){
@@ -165,11 +259,18 @@ export default async function handler(req,res){
    if(requestedStatus==="INVOICE SENT"&&!invoiceSentAt)invoiceSentAt=nowIso;
    if(requestedStatus==="DEPOSIT PAID"&&!depositPaidAt)depositPaidAt=nowIso;
 
-   const rows=await q`UPDATE leads SET
+   let reviewStatus=current.review_status||"DRAFT";
+   const mockupImage=d.mockupImage??current.mockup_url;
+   const outreachText=d.outreachText??current.outreach_text;
+   const changedReviewedMaterial=(d.mockupImage!==undefined&&d.mockupImage!==current.mockup_url)||(d.outreachText!==undefined&&d.outreachText!==current.outreach_text);
+   if(user.id===current.owner_id&&owner?.role==="sales"&&!owner.independent_outreach&&reviewStatus==="APPROVED"&&changedReviewedMaterial)reviewStatus="DRAFT";
+
+   let rows=await q`UPDATE leads SET
     company=${d.company||current.company},industry=${d.industry||null},city=${d.city||null},website=${d.website||null},email=${d.email||null},phone=${d.phone||null},
     score=${Number(d.score??current.score)},status=${requestedStatus},value_cents=${Math.round(Number(d.value??current.value_cents/100)*100)},
-    notes=${d.notes||null},handoff_summary=${d.handoffSummary||null},promises=${d.promises||null},
-    last_contact=${d.lastContact||null},next_follow_up=${d.nextFollowUp||null},owner_id=${ownerId},
+    notes=${d.notes||null},handoff_summary=${d.handoffSummary||null},promises=${d.promises||null},outreach_text=${outreachText||null},mockup_url=${mockupImage||null},
+    review_status=${reviewStatus},
+    last_contact=${d.lastContact||current.last_contact||null},next_follow_up=${d.nextFollowUp||null},owner_id=${ownerId},
     commission_cents=${commissionCents},commission_paid=${d.commissionPaid??current.commission_paid},
     handoff_requested_at=${handoffRequestedAt},invoice_sent_at=${invoiceSentAt},deposit_paid_at=${depositPaidAt},updated_at=now()
     WHERE id=${d.id} RETURNING *`;
@@ -178,7 +279,7 @@ export default async function handler(req,res){
     const snapshot=await createCommissions(q,rows[0],commissionCents);
     if(commissionCents==null&&snapshot!=null){
      const upd=await q`UPDATE leads SET commission_cents=${snapshot} WHERE id=${d.id} RETURNING *`;
-     rows[0]=upd[0];
+     rows=upd;
     }
     await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id,details)
       VALUES(${user.id},'DEPOSIT_CONFIRMED','lead',${d.id},${JSON.stringify({invoiceRequired:true})}::jsonb)`;
@@ -195,7 +296,7 @@ export default async function handler(req,res){
 
    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id,details)
     VALUES(${user.id},'LEAD_UPDATED','lead',${d.id},${JSON.stringify({from:current.status,to:rows[0].status})}::jsonb)`;
-   return json(res,200,{lead:out(rows[0])});
+   return json(res,200,{lead:await out(q,rows[0])});
   }
 
   if(req.method==="DELETE"){
