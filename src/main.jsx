@@ -3,6 +3,7 @@ import{createRoot}from"react-dom/client";
 import{LayoutDashboard,Building2,Plus,Search,Mail,Phone,Pencil,Trash2,Target,CheckCircle2,X,Download,Upload,Users,GraduationCap,Wallet,Image as ImageIcon,Copy,Check,CalendarClock,MessageSquareText,UserRound,FileImage,ShieldCheck,Printer,UserPlus,Network,History,LockKeyhole,MessagesSquare,LifeBuoy,Inbox,Send,UserCheck}from"lucide-react";
 import"./styles.css";
 import{AGREEMENT_VERSION,agreementSections,printableAgreementHtml}from"./agreement";
+import{api}from"./api";
 
 const statuses=["NEW","MOCKUP READY","CONTACTED","REPLIED","INTERESTED","READY FOR TOM","MEETING","DEPOSIT PAID","IN DEVELOPMENT","WON","LOST"];
 const labels={"NEW":"Jauns","MOCKUP READY":"Mockup gatavs","CONTACTED":"Sazināts","REPLIED":"Atbildēja","INTERESTED":"Interesējas","READY FOR TOM":"Gatavs pārņemšanai","MEETING":"Google Meet","DEPOSIT PAID":"Priekšapmaksa","IN DEVELOPMENT":"Izstrādē","WON":"Pabeigts","LOST":"Zaudēts"};
@@ -42,16 +43,17 @@ function normLead(l){return{...emptyLead,...l,contactLog:Array.isArray(l.contact
 function domain(v=""){try{return new URL(v.startsWith("http")?v:"https://"+v).hostname.replace(/^www\./,"").toLowerCase()}catch{return v.toLowerCase().replace(/^www\./,"").split("/")[0]}}
 function printAgreement(member){const w=window.open("","_blank","width=900,height=1000");if(!w)return alert("Pārlūks nobloķēja drukas logu.");w.document.open();w.document.write(printableAgreementHtml(member));w.document.close()}
 
-function App(){
- const[members,setMembers]=useState(()=>{try{return(JSON.parse(localStorage.getItem("tagorit_members"))||baseMembers).map(normMember)}catch{return baseMembers.map(normMember)}});
- const[leads,setLeads]=useState(()=>{try{return(JSON.parse(localStorage.getItem("tagorit_leads"))||seed).map(normLead)}catch{return seed.map(normLead)}});
+function App({sessionUser,onLogout}){
+ const[members,setMembers]=useState([normMember(sessionUser)]);
+ const[leads,setLeads]=useState([]);
  const[audit,setAudit]=useState(()=>{try{return JSON.parse(localStorage.getItem("tagorit_audit"))||[]}catch{return[]}});\n const[messages,setMessages]=useState(()=>{try{return JSON.parse(localStorage.getItem("tagorit_messages"))||[]}catch{return[]}});\n const[support,setSupport]=useState(()=>{try{return JSON.parse(localStorage.getItem("tagorit_support"))||[]}catch{return[]}});
- const[active,setActive]=useState(()=>localStorage.getItem("tagorit_active_user")||"admin");
+ const[active,setActive]=useState(sessionUser.id);
+ const[backendLoading,setBackendLoading]=useState(true),[backendError,setBackendError]=useState("");
  const[view,setView]=useState("dashboard"),[query,setQuery]=useState(""),[status,setStatus]=useState("ALL"),[modal,setModal]=useState(null),[memberModal,setMemberModal]=useState(null),[agreementMember,setAgreementMember]=useState(null),[copied,setCopied]=useState("");
- useEffect(()=>localStorage.setItem("tagorit_members",JSON.stringify(members)),[members]);
- useEffect(()=>localStorage.setItem("tagorit_leads",JSON.stringify(leads)),[leads]);
+ useEffect(()=>{let alive=true;api.bootstrap().then(d=>{if(!alive)return;setMembers((d.users||[]).map(normMember));setLeads((d.leads||[]).map(normLead));setActive(d.user.id);setBackendLoading(false)}).catch(e=>{if(!alive)return;setBackendError(e.message);setBackendLoading(false)});return()=>{alive=false}},[]);
+
  useEffect(()=>localStorage.setItem("tagorit_audit",JSON.stringify(audit)),[audit]);\n useEffect(()=>localStorage.setItem("tagorit_messages",JSON.stringify(messages)),[messages]);\n useEffect(()=>localStorage.setItem("tagorit_support",JSON.stringify(support)),[support]);
- useEffect(()=>localStorage.setItem("tagorit_active_user",active),[active]);
+
 
  const user=members.find(m=>m.id===active)||members[0],isAdmin=user.role==="admin",isLead=user.role==="team_lead";
  const childIds=members.filter(m=>m.parentId===user.id&&m.active).map(m=>m.id);
@@ -66,22 +68,29 @@ function App(){
  const paid=isAdmin?0:eligible.filter(l=>l.ownerId===user.id&&l.commissionPaid).reduce((a,l)=>a+Number(l.commission??user.payout??0),0);
  const stats={total:visible.length,contacted:visible.filter(l=>["CONTACTED","REPLIED","INTERESTED","MEETING","DEPOSIT PAID","IN DEVELOPMENT","WON"].includes(l.status)).length,hot:visible.filter(l=>["INTERESTED","MEETING"].includes(l.status)).length,deals:eligible.length,revenue:eligible.reduce((a,l)=>a+Number(l.value||0),0),earned,paid,pending:isAdmin?earned:Math.max(0,earned-paid)};
 
- function saveLead(e){
+ async function saveLead(e){
   e.preventDefault();
   const x=normLead(modal);
   const duplicate=leads.find(l=>l.id!==x.id&&((x.website&&domain(x.website)===domain(l.website))||(x.email&&l.email&&x.email.toLowerCase()===l.email.toLowerCase())||(x.company&&l.company&&x.company.trim().toLowerCase()===l.company.trim().toLowerCase())));
   if(duplicate)return alert("Šis uzņēmums jau ir sistēmā: "+duplicate.company+". Tas pieder citam vai jau esošam klienta ierakstam.");
-  if(x.id){setLeads(v=>v.map(l=>l.id===x.id?x:l));log("Klients atjaunināts",x.company)}
-  else{const created={...x,id:crypto.randomUUID(),ownerId:x.ownerId||active};setLeads(v=>[created,...v]);log("Klients pievienots",created.company)}
-  setModal(null);
+  try{
+   if(x.id){const d=await api.updateLead(x);setLeads(v=>v.map(l=>l.id===x.id?normLead(d.lead):l));log("Klients atjaunināts",x.company)}
+   else{const d=await api.createLead({...x,ownerId:x.ownerId||active});setLeads(v=>[normLead(d.lead),...v]);log("Klients pievienots",d.lead.company)}
+   setModal(null);
+  }catch(err){alert(err.message)}
+
  }
- function changeStatus(id,s){setLeads(v=>v.map(l=>l.id===id?{...l,status:s}:l));const l=leads.find(x=>x.id===id);log("Statuss mainīts",(l?.company||id)+" → "+labels[s])}
- function removeLead(id){const l=leads.find(x=>x.id===id);if(confirm("Dzēst šo klientu?")){setLeads(v=>v.filter(x=>x.id!==id));log("Klients dzēsts",l?.company||id)}}
- function saveMember(data){
-  const m=normMember({...data,id:data.id||crypto.randomUUID()});
-  if(data.id){setMembers(v=>v.map(x=>x.id===m.id?m:x));log("Komandas dalībnieks atjaunināts",m.name)}
-  else{setMembers(v=>[...v,m]);log("Komandas dalībnieks pievienots",m.name);setAgreementMember(m)}
-  setMemberModal(null);
+ async function changeStatus(id,statusValue){const l=leads.find(x=>x.id===id);if(!l)return;try{const d=await api.updateLead({...l,status:statusValue});setLeads(v=>v.map(x=>x.id===id?normLead(d.lead):x));log("Statuss mainīts",(l.company||id)+" → "+labels[statusValue])}catch(err){alert(err.message)}}
+ async function removeLead(id){const l=leads.find(x=>x.id===id);if(!confirm("Dzēst šo klientu?"))return;try{await api.deleteLead(id);setLeads(v=>v.filter(x=>x.id!==id));log("Klients dzēsts",l?.company||id)}catch(err){alert(err.message)}}
+ async function saveMember(data){
+  try{
+   if(data.id){
+    const d=await api.updateUser(data);const m=normMember(d.user);setMembers(v=>v.map(x=>x.id===m.id?m:x));log("Komandas dalībnieks atjaunināts",m.name);
+   }else{
+    const d=await api.createUser(data);const m=normMember(d.user);setMembers(v=>[...v,m]);log("Komandas dalībnieks pievienots",m.name);setAgreementMember(m);alert("Pagaidu parole "+m.name+": "+d.tempPassword+"\n\nSaglabā to droši un nosūti darbiniekam atsevišķi.");
+   }
+   setMemberModal(null);
+  }catch(err){alert(err.message)}
  }
  function acceptAgreement(memberId){
   const stamp=now();
@@ -89,16 +98,18 @@ function App(){
   log("Digitālā vienošanās apstiprināta","Versija "+AGREEMENT_VERSION,memberId);
   setAgreementMember(null);
  }
- function togglePaper(id){setMembers(v=>v.map(m=>m.id===id?{...m,paperSigned:!m.paperSigned}:m));const m=members.find(x=>x.id===id);log("Papīra līguma statuss mainīts",m?.name||id)}
+ async function togglePaper(id){const m=members.find(x=>x.id===id);if(!m)return;try{const d=await api.updateUser({...m,paperSigned:!m.paperSigned});setMembers(v=>v.map(x=>x.id===id?normMember(d.user):x));log("Papīra līguma statuss mainīts",m.name)}catch(err){alert(err.message)}}
  function exportData(){const b=new Blob([JSON.stringify({members,leads,audit},null,2)],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="tagorit-backup.json";a.click();URL.revokeObjectURL(u)}
  function importData(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.leads))setLeads(d.leads.map(normLead));if(Array.isArray(d.members))setMembers(d.members.map(normMember));if(Array.isArray(d.audit))setAudit(d.audit)}catch{alert("Nederīgs backup fails.")}};r.readAsText(f)}
 
  const agreementRequired=!isAdmin&&(!user.agreementAcceptedAt||user.agreementVersion!==AGREEMENT_VERSION);
  const title={dashboard:isAdmin?"Komandas pārskats":isLead?"Manas komandas pārskats":"Mans pārskats",leads:"Klienti",tutorial:"Darba instrukcija",scripts:"Sarunu skripti",team:"Komanda",messages:"Privātās ziņas",support:"Supports",handoff:"Pārņemšana",audit:"Audit log"}[view];
 
+ if(backendLoading)return <div className="appLoading"><div className="mark">T</div><b>Ielādē Tagorit...</b></div>;
+ if(backendError)return <div className="fatal"><h2>Nevar pieslēgties Tagorit backendam</h2><p>{backendError}</p><button className="secondary" onClick={onLogout}>Atgriezties uz login</button></div>;
  return <div className="shell">
   <aside><div className="brand"><div className="mark">T</div><div><b>Tagorit</b><small>Sales network</small></div></div>
-   <div className="switch"><span>Lietotāja skats</span><select value={active} onChange={e=>{setActive(e.target.value);setView("dashboard")}}>{members.filter(m=>m.active).map(m=><option key={m.id} value={m.id}>{m.name} · {roleName(m.role)}</option>)}</select></div>
+   <div className="accountBox"><div className="avatar">{user.name?.slice(0,1).toUpperCase()}</div><div><b>{user.name}</b><small>{roleName(user.role)}</small></div><button onClick={onLogout}>Iziet</button></div>
    <nav><N icon={LayoutDashboard} a={view==="dashboard"} on={()=>setView("dashboard")}>Dashboard</N><N icon={Building2} a={view==="leads"} on={()=>setView("leads")}>Klienti</N><N icon={GraduationCap} a={view==="tutorial"} on={()=>setView("tutorial")}>Tutorial</N><N icon={MessageSquareText} a={view==="scripts"} on={()=>setView("scripts")}>Skripti</N><N icon={MessagesSquare} a={view==="messages"} on={()=>setView("messages")}>Ziņas</N><N icon={LifeBuoy} a={view==="support"} on={()=>setView("support")}>Supports</N>{isAdmin&&<N icon={Inbox} a={view==="handoff"} on={()=>setView("handoff")}>Pārņemšana</N>}{isAdmin&&<N icon={Network} a={view==="team"} on={()=>setView("team")}>Komanda</N>}{isAdmin&&<N icon={History} a={view==="audit"} on={()=>setView("audit")}>Audit</N>}</nav>
    <div className="goal"><Target size={18}/><div><b>Dienas mērķis</b><small>10–15 kvalitatīvi kontakti</small></div></div>
   </aside>
@@ -144,4 +155,17 @@ function MemberModal({member,members,save,close}){const[m,setM]=useState(normMem
 function AgreementModal({member,accept,close,gate,adminMode,onBack}){const[checked,setChecked]=useState(false),[typed,setTyped]=useState("");const valid=checked&&typed.trim().toLowerCase()===member.name.trim().toLowerCase();return <div className="overlay agreementOverlay"><div className="modal agreementModal"><div className="modalHead"><div><h2><LockKeyhole size={18}/> Sadarbības un konfidencialitātes vienošanās</h2><p>Versija {AGREEMENT_VERSION} · {member.name} · {roleName(member.role)}</p></div>{adminMode&&close&&<button type="button" onClick={close}><X/></button>}</div><div className="agreementScroll"><div className="agreementIntro">Pirms piekļuves klientu datiem ir jāiepazīstas ar noteikumiem un tie jāapstiprina.</div>{agreementSections.map(s=><section key={s.title}><h3>{s.title}</h3>{s.paragraphs.map((p,i)=><p key={i}>{p}</p>)}</section>)}</div><div className="agreementAccept"><button type="button" className="secondary" onClick={()=>printAgreement(member)}><Printer size={15}/>Drukāt papīra versiju</button><label className="checkLine"><input type="checkbox" checked={checked} onChange={e=>setChecked(e.target.checked)}/><span>Esmu izlasījis/-usi vienošanos, saprotu tās saturu un apņemos to ievērot.</span></label><label className="typedName"><span>Apstiprināšanai ieraksti savu vārdu un uzvārdu tieši kā norādīts:</span><b>{member.name}</b><input value={typed} onChange={e=>setTyped(e.target.value)} placeholder={member.name}/></label></div><div className="modalFoot">{gate&&onBack&&<button className="secondary" onClick={onBack}>Atpakaļ uz admin skatu</button>}{adminMode&&close&&<button className="secondary" onClick={close}>Vēlāk</button>}<button className="primary" disabled={!valid} onClick={()=>accept(member.id)}><ShieldCheck size={15}/>Apstiprināt vienošanos</button></div></div></div>}
 function LeadModal({lead,setLead,members,isAdmin,save,close}){const[logType,setLogType]=useState("E-pasts"),[logNote,setLogNote]=useState(""),[adminComment,setAdminComment]=useState("");const set=(k,v)=>setLead({...lead,[k]:v});const owner=members.find(m=>m.id===lead.ownerId),commission=lead.commission??owner?.payout??0;function addLog(){if(!logNote.trim())return;const d=new Date().toISOString().slice(0,10),x={id:crypto.randomUUID(),date:d,type:logType,note:logNote.trim()};setLead({...lead,contactLog:[x,...(lead.contactLog||[])],lastContact:d});setLogNote("")}function image(e){const f=e.target.files?.[0];if(!f||!f.type.startsWith("image/"))return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const max=1400,sc=Math.min(1,max/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext("2d").drawImage(im,0,0,c.width,c.height);set("mockupImage",c.toDataURL("image/jpeg",.76))};im.src=r.result};r.readAsDataURL(f)}return <div className="overlay"><form className="modal" onSubmit={save}><div className="modalHead"><div><h2>{lead.id?lead.company:"Jauns klients"}</h2><p>Klienta dati, mockup, saziņas vēsture un atlīdzība.</p></div><button type="button" onClick={close}><X/></button></div><div className="modalBody"><div className="form"><F l="Uzņēmums"><input required value={lead.company} onChange={e=>set("company",e.target.value)}/></F><F l="Nozare"><select value={lead.industry} onChange={e=>set("industry",e.target.value)}>{industries.map(x=><option key={x}>{x}</option>)}</select></F><F l="Pilsēta"><input value={lead.city} onChange={e=>set("city",e.target.value)}/></F><F l="Lead score"><input type="number" min="0" max="100" value={lead.score} onChange={e=>set("score",Number(e.target.value))}/></F><F l="E-pasts"><input value={lead.email} onChange={e=>set("email",e.target.value)}/></F><F l="Telefons"><input value={lead.phone} onChange={e=>set("phone",e.target.value)}/></F><F l="Mājaslapa"><input value={lead.website} onChange={e=>set("website",e.target.value)}/></F><F l="Statuss"><select value={lead.status} onChange={e=>set("status",e.target.value)}>{statuses.map(s=><option key={s} value={s}>{labels[s]}</option>)}</select></F><F l="Darījuma vērtība (€)"><input type="number" value={lead.value} onChange={e=>set("value",Number(e.target.value))}/></F><F l="Atbildīgais"><select disabled={!isAdmin} value={lead.ownerId} onChange={e=>set("ownerId",e.target.value)}>{members.filter(m=>m.role!=="admin"&&m.active).map(m=><option key={m.id} value={m.id}>{m.name} · {roleName(m.role)}</option>)}</select></F><F l="Nākamais follow-up"><input type="date" value={lead.nextFollowUp||""} onChange={e=>set("nextFollowUp",e.target.value)}/></F>{isAdmin&&<F l="Individuālā komisija (€)"><input type="number" placeholder={String(owner?.payout||0)} value={lead.commission??""} onChange={e=>set("commission",e.target.value===""?null:Number(e.target.value))}/></F>}{isAdmin&&<F l="Komisijas statuss"><select value={lead.commissionPaid?"paid":"pending"} onChange={e=>set("commissionPaid",e.target.value==="paid")}><option value="pending">Gaida izmaksu</option><option value="paid">Izmaksāts</option></select></F>}<div className="wide"><F l="Piezīmes"><textarea rows="4" value={lead.notes} onChange={e=>set("notes",e.target.value)}/></F></div></div><section className="block"><div className="blockTitle"><FileImage size={18}/><div><b>Nosūtītais mockup</b><small>Bilde, ko nosūtīji klientam.</small></div></div>{lead.mockupImage?<div className="mock"><img src={lead.mockupImage}/><button type="button" className="secondary" onClick={()=>set("mockupImage","")}>Noņemt</button></div>:<label className="uploadZone"><ImageIcon size={25}/><b>Pievienot mockup bildi</b><small>PNG/JPG, attēls tiks samazināts glabāšanai.</small><input hidden type="file" accept="image/*" onChange={image}/></label>}</section><section className="block"><div className="blockTitle"><MessageSquareText size={18}/><div><b>Saziņas vēsture</b><small>E-pasti, zvani un Google Meet.</small></div></div><div className="log"><select value={logType} onChange={e=>setLogType(e.target.value)}><option>E-pasts</option><option>Zvans</option><option>Google Meet</option><option>Follow-up</option><option>Cits</option></select><input value={logNote} onChange={e=>setLogNote(e.target.value)} placeholder="Ko klients pateica?"/><button type="button" className="secondary" onClick={addLog}><Plus size={14}/>Pievienot</button></div><div className="timeline">{(lead.contactLog||[]).map(x=><div className="event" key={x.id}><i/><div><b>{x.type}<span>{x.date}</span></b><p>{x.note}</p></div></div>)}</div></section><section className="block"><div className="blockTitle"><MessageSquareText size={18}/><div><b>Admin komentāri</b><small>Norādes un piezīmes konkrētajam partnerim.</small></div></div>{(lead.adminComments||[]).map(c=><div className="adminComment" key={c.id}><b>Admin</b><p>{c.body}</p><small>{new Date(c.at).toLocaleString("lv-LV")}</small></div>)}{isAdmin&&<div className="log"><input value={adminComment} onChange={e=>setAdminComment(e.target.value)} placeholder="Uzraksti komentāru partnerim..."/><button type="button" className="secondary" onClick={()=>{if(!adminComment.trim())return;setLead({...lead,adminComments:[...(lead.adminComments||[]),{id:crypto.randomUUID(),body:adminComment.trim(),at:now()}]});setAdminComment("")}}><Plus size={14}/>Pievienot</button></div>}</section><div className="commission"><Wallet size={18}/><div><small>Partnera komisija par šo klientu</small><b>€{commission}</b></div><span>{payoutStatuses.includes(lead.status)?(lead.commissionPaid?"Izmaksāts":"Nopelnīts · gaida izmaksu"):"Tiks ieskaitīts pēc priekšapmaksas"}</span></div></div><div className="modalFoot"><button type="button" className="secondary" onClick={close}>Atcelt</button><button className="primary">Saglabāt klientu</button></div></form></div>}
 function F({l,children}){return <label className="field"><span>{l}</span>{children}</label>}
-createRoot(document.getElementById("root")).render(<App/>);
+function LoginScreen({onLogin}){
+ const[email,setEmail]=useState(""),[password,setPassword]=useState(""),[error,setError]=useState(""),[loading,setLoading]=useState(false);
+ async function submit(e){e.preventDefault();setLoading(true);setError("");try{const d=await api.login(email,password);onLogin(d.user)}catch(err){setError(err.message)}finally{setLoading(false)}}
+ return <div className="loginPage"><form className="loginCard" onSubmit={submit}><div className="loginBrand"><div className="mark">T</div><div><b>Tagorit</b><small>Sales network</small></div></div><h1>Ielogoties</h1><p>Ievadi savu darba kontu, lai turpinātu.</p><F l="E-pasts"><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email"/></F><F l="Parole"><input type="password" required value={password} onChange={e=>setPassword(e.target.value)} autoComplete="current-password"/></F>{error&&<div className="loginError">{error}</div>}<button className="primary loginButton" disabled={loading}>{loading?"Pieslēdzas...":"Ielogoties"}</button></form></div>
+}
+function Root(){
+ const[user,setUser]=useState(null),[loading,setLoading]=useState(true);
+ useEffect(()=>{api.me().then(d=>setUser(d.user)).catch(()=>setUser(null)).finally(()=>setLoading(false))},[]);
+ async function logout(){try{await api.logout()}finally{setUser(null)}}
+ if(loading)return <div className="appLoading"><div className="mark">T</div><b>Pārbauda sesiju...</b></div>;
+ if(!user)return <LoginScreen onLogin={setUser}/>;
+ return <App sessionUser={user} onLogout={logout}/>;
+}
+createRoot(document.getElementById("root")).render(<Root/>);
