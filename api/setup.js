@@ -3,12 +3,133 @@ import { sql } from "./_lib/db.js";
 import { body,json } from "./_lib/http.js";
 import { createSession,publicUser } from "./_lib/auth.js";
 
+async function ensureSchema(q){
+  await q`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
+
+  await q`CREATE TABLE IF NOT EXISTS users (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    email text UNIQUE NOT NULL,
+    password_hash text NOT NULL,
+    name text NOT NULL,
+    role text NOT NULL CHECK (role IN ('admin','team_lead','sales')),
+    parent_user_id uuid REFERENCES users(id) ON DELETE SET NULL,
+    payout_cents integer NOT NULL DEFAULT 5000,
+    override_cents integer NOT NULL DEFAULT 0,
+    active boolean NOT NULL DEFAULT true,
+    agreement_version text,
+    agreement_accepted_at timestamptz,
+    paper_signed boolean NOT NULL DEFAULT false,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+  )`;
+
+  await q`CREATE TABLE IF NOT EXISTS sessions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash text UNIQUE NOT NULL,
+    expires_at timestamptz NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS sessions_token_hash_idx ON sessions(token_hash)`;
+  await q`CREATE INDEX IF NOT EXISTS sessions_user_id_idx ON sessions(user_id)`;
+
+  await q`CREATE TABLE IF NOT EXISTS leads (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id uuid NOT NULL REFERENCES users(id),
+    company text NOT NULL,
+    industry text,
+    city text,
+    website text,
+    email text,
+    phone text,
+    score integer NOT NULL DEFAULT 50 CHECK(score BETWEEN 0 AND 100),
+    status text NOT NULL DEFAULT 'NEW',
+    value_cents integer NOT NULL DEFAULT 39900,
+    commission_cents integer,
+    commission_paid boolean NOT NULL DEFAULT false,
+    notes text,
+    mockup_url text,
+    last_contact date,
+    next_follow_up date,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS leads_owner_idx ON leads(owner_id)`;
+  await q`CREATE INDEX IF NOT EXISTS leads_status_idx ON leads(status)`;
+  await q`CREATE UNIQUE INDEX IF NOT EXISTS leads_website_unique ON leads(lower(website)) WHERE website IS NOT NULL AND website <> ''`;
+  await q`CREATE UNIQUE INDEX IF NOT EXISTS leads_email_unique ON leads(lower(email)) WHERE email IS NOT NULL AND email <> ''`;
+
+  await q`CREATE TABLE IF NOT EXISTS lead_activity (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    lead_id uuid NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+    actor_id uuid NOT NULL REFERENCES users(id),
+    activity_type text NOT NULL,
+    body text NOT NULL,
+    visibility text NOT NULL DEFAULT 'team' CHECK (visibility IN ('team','admin')),
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS lead_activity_lead_idx ON lead_activity(lead_id)`;
+
+  await q`CREATE TABLE IF NOT EXISTS messages (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    sender_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    body text NOT NULL,
+    read_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS messages_participants_idx ON messages(sender_id,recipient_id)`;
+
+  await q`CREATE TABLE IF NOT EXISTS support_tickets (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id),
+    subject text NOT NULL,
+    body text NOT NULL,
+    status text NOT NULL DEFAULT 'OPEN' CHECK(status IN ('OPEN','CLOSED')),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+  )`;
+
+  await q`CREATE TABLE IF NOT EXISTS support_replies (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    ticket_id uuid NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+    sender_id uuid NOT NULL REFERENCES users(id),
+    body text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`;
+
+  await q`CREATE TABLE IF NOT EXISTS commission_ledger (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    lead_id uuid NOT NULL REFERENCES leads(id),
+    user_id uuid NOT NULL REFERENCES users(id),
+    type text NOT NULL CHECK(type IN ('SALE','TEAM_OVERRIDE')),
+    amount_cents integer NOT NULL,
+    status text NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','PAID','VOID')),
+    paid_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`;
+  await q`CREATE UNIQUE INDEX IF NOT EXISTS commission_unique_event ON commission_ledger(lead_id,user_id,type)`;
+
+  await q`CREATE TABLE IF NOT EXISTS audit_log (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    actor_id uuid REFERENCES users(id) ON DELETE SET NULL,
+    action text NOT NULL,
+    entity_type text,
+    entity_id uuid,
+    details jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+  )`;
+  await q`CREATE INDEX IF NOT EXISTS audit_created_idx ON audit_log(created_at DESC)`;
+}
+
 export default async function handler(req,res){
  try{
   const q=sql();
+  await ensureSchema(q);
+
   if(req.method==="GET"){
     const rows=await q`SELECT EXISTS(SELECT 1 FROM users WHERE role='admin' AND active=true) AS has_admin`;
-    return json(res,200,{needsSetup:!rows[0]?.has_admin});
+    return json(res,200,{needsSetup:!rows[0]?.has_admin,schemaReady:true});
   }
 
   if(req.method==="POST"){
@@ -43,9 +164,6 @@ export default async function handler(req,res){
   console.error(e);
   if(e?.message==="DATABASE_URL is not configured"){
     return json(res,503,{error:"Vercel projektā nav iestatīts DATABASE_URL.",code:"DATABASE_URL_MISSING"});
-  }
-  if(e?.code==="42P01"){
-    return json(res,503,{error:"Neon datubāzes shēma vēl nav uzstādīta. Atver Neon SQL Editor un palaid db/schema.sql.",code:"SCHEMA_MISSING"});
   }
   if(e?.code==="28P01"){
     return json(res,503,{error:"Neon DATABASE_URL lietotājvārds vai parole nav derīga.",code:"DATABASE_AUTH_FAILED"});
