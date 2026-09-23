@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS leads (
   commission_cents integer,
   commission_paid boolean NOT NULL DEFAULT false,
   notes text,
+  handoff_summary text,
+  promises text,
+  handoff_requested_at timestamptz,
+  invoice_sent_at timestamptz,
+  deposit_paid_at timestamptz,
   mockup_url text,
   last_contact date,
   next_follow_up date,
@@ -52,6 +57,12 @@ CREATE INDEX IF NOT EXISTS leads_owner_idx ON leads(owner_id);
 CREATE INDEX IF NOT EXISTS leads_status_idx ON leads(status);
 CREATE UNIQUE INDEX IF NOT EXISTS leads_website_unique ON leads(lower(website)) WHERE website IS NOT NULL AND website <> '';
 CREATE UNIQUE INDEX IF NOT EXISTS leads_email_unique ON leads(lower(email)) WHERE email IS NOT NULL AND email <> '';
+
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS handoff_summary text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS promises text;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS handoff_requested_at timestamptz;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS invoice_sent_at timestamptz;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS deposit_paid_at timestamptz;
 
 CREATE TABLE IF NOT EXISTS lead_activity (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
