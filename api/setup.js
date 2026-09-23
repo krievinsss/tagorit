@@ -19,9 +19,12 @@ async function ensureSchema(q){
     agreement_version text,
     agreement_accepted_at timestamptz,
     paper_signed boolean NOT NULL DEFAULT false,
+    independent_outreach boolean NOT NULL DEFAULT false,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
   )`;
+
+  await q`ALTER TABLE users ADD COLUMN IF NOT EXISTS independent_outreach boolean NOT NULL DEFAULT false`;
 
   await q`CREATE TABLE IF NOT EXISTS sessions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -50,6 +53,12 @@ async function ensureSchema(q){
     notes text,
     handoff_summary text,
     promises text,
+    outreach_text text,
+    review_status text NOT NULL DEFAULT 'DRAFT',
+    review_feedback text,
+    review_requested_at timestamptz,
+    reviewed_at timestamptz,
+    reviewed_by uuid REFERENCES users(id) ON DELETE SET NULL,
     handoff_requested_at timestamptz,
     invoice_sent_at timestamptz,
     deposit_paid_at timestamptz,
@@ -68,6 +77,12 @@ async function ensureSchema(q){
   await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS handoff_requested_at timestamptz`;
   await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS invoice_sent_at timestamptz`;
   await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS deposit_paid_at timestamptz`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS outreach_text text`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS review_status text NOT NULL DEFAULT 'DRAFT'`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS review_feedback text`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS review_requested_at timestamptz`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS reviewed_at timestamptz`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS reviewed_by uuid REFERENCES users(id) ON DELETE SET NULL`;
 
   await q`CREATE TABLE IF NOT EXISTS lead_activity (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
