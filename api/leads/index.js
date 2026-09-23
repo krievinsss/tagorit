@@ -79,7 +79,7 @@ function parseContact(a){
 async function activitiesFor(q,leadId){
  const rows=await q`SELECT * FROM lead_activity WHERE lead_id=${leadId} ORDER BY created_at DESC`;
  return{
-  contactLog:rows.filter(a=>a.activity_type==="CONTACT").map(parseContact),
+  contactLog:rows.filter(a=>["CONTACT","REACTIVATION"].includes(a.activity_type)).map(a=>{if(a.activity_type==="CONTACT")return parseContact(a);let d={};try{d=JSON.parse(a.body)}catch{}return{id:a.id,date:String(a.created_at).slice(0,10),type:"Reaktivācija",note:"Sales process sākts no jauna"+(d.lostReason?" · iepriekšējais LOST: "+d.lostReason:""),actorId:a.actor_id,at:a.created_at}}),
   adminComments:rows.filter(a=>a.activity_type==="COMMENT").map(a=>({id:a.id,body:a.body,actorId:a.actor_id,at:a.created_at}))
  };
 }
@@ -303,8 +303,8 @@ export default async function handler(req,res){
    const websiteType=normalizedWebsiteType(d.websiteType??current.website_type);
    const offerCode=offerForWebsiteType(websiteType);
    const proposedOutreach=String(d.outreachText??current.outreach_text??"");
-   if(requestedStatus==="CONTACTED"&&websiteType==="UNKNOWN")return json(res,400,{error:"Pirms pirmā kontakta norādi mājaslapas tipu"});
-   if(requestedStatus==="CONTACTED"&&offerCode!=="STANDARD_399"&&/\b399\b/.test(proposedOutreach))
+   if(requestedStatus==="CONTACTED"&&current.status!=="CONTACTED"&&websiteType==="UNKNOWN")return json(res,400,{error:"Pirms pirmā kontakta norādi mājaslapas tipu"});
+   if(requestedStatus==="CONTACTED"&&current.status!=="CONTACTED"&&offerCode!=="STANDARD_399"&&/\b399\b/.test(proposedOutreach))
     return json(res,400,{error:"Šim projektam 399 € standarta piedāvājums nav piemērojams. Izmanto custom quote / nodod Tomam."});
    if(user.role!=="admin"&&!sellerStatuses.includes(requestedStatus)){
     return json(res,403,{error:"Šo statusu drīkst iestatīt tikai admins"});
