@@ -1,6 +1,6 @@
 import React,{useEffect,useMemo,useState}from"react";
 import{createRoot}from"react-dom/client";
-import{LayoutDashboard,Building2,Plus,Search,Mail,Phone,Pencil,Trash2,Target,CheckCircle2,X,Download,Upload,Users,GraduationCap,Wallet,Image as ImageIcon,Copy,Check,CalendarClock,MessageSquareText,UserRound,FileImage,ShieldCheck,Printer,UserPlus,Network,History,LockKeyhole,MessagesSquare,LifeBuoy,Inbox,Send,UserCheck}from"lucide-react";
+import{LayoutDashboard,Building2,Plus,Search,Mail,Phone,Pencil,Trash2,Target,CheckCircle2,X,Download,Upload,Users,GraduationCap,Wallet,Image as ImageIcon,Copy,Check,CalendarClock,MessageSquareText,UserRound,FileImage,ShieldCheck,Printer,UserPlus,Network,History,LockKeyhole,MessagesSquare,LifeBuoy,Inbox,Send,UserCheck,ExternalLink}from"lucide-react";
 import"./styles.css";
 import{AGREEMENT_VERSION,agreementSections,printableAgreementHtml}from"./agreement";
 import{api}from"./api";
@@ -144,6 +144,24 @@ function Tutorial({isAdmin}){
  const situations=allowedSituations.filter(x=>(situationCat==="ALL"||x.cat===situationCat)&&(!q||(x.title+" "+x.what+" "+x.do.join(" ")+" "+x.dont.join(" ")).toLowerCase().includes(q)));
  return <div className="content playbookPage">
   <div className="intro playbookIntro"><div><span className="eyebrow">TAGORIT SALES PLAYBOOK</span><h2>No pirmā lead līdz apmaksātam klientam</h2><p>Šī ir darba rokasgrāmata ikdienai. Ja neesi pārliecināts, ko darīt konkrētā situācijā, vispirms atrodi to šeit; ja jautājums ir par custom cenu, tehnisku funkciju vai nestandarta vienošanos — nodod Tomam.</p></div><div className="priceBox"><small>Standarta piedāvājums</small><b>399 €</b><span>50% priekšapmaksa · 2 labojumu cikli</span></div></div>
+  <section className="outreachOverview">
+   <div className="outreachFlow">
+    <div><span>1</span><b>Aukstais e-pasts</b><small>Personalizēts mockup + īsa uzruna</small></div>
+    <i/>
+    <div><span>2</span><b>Follow-up #1</b><small>Pēc 3–4 darba dienām</small></div>
+    <i/>
+    <div><span>3</span><b>Follow-up #2</b><small>Pēdējais e-pasta atgādinājums</small></div>
+    <i/>
+    <div><span>4</span><b>Telefona zvans</b><small>Viens kvalitatīvs mēģinājums</small></div>
+    <i/>
+    <div><span>5</span><b>Handoff Tomam</b><small>Pirms jebkāda rēķina vai maksājuma</small></div>
+   </div>
+   <a className="catalogLink" href="https://www.1188.lv/katalogs" target="_blank" rel="noopener noreferrer">
+    <div className="catalogIcon"><Building2 size={19}/></div>
+    <div><small>LEAD AVOTS</small><b>1188 uzņēmumu katalogs</b><span>Atver katalogu un manuāli meklē uzņēmumus pēc nozares, pilsētas un pakalpojuma.</span></div>
+    <ExternalLink size={17}/>
+   </a>
+  </section>
   <section className="panel packageScope"><div className="sectionHeading"><div><span className="eyebrow">399 € PAKETE — NOFIKSĒTS</span><h2>Ko tieši drīkst pārdot par fiksēto cenu</h2></div><strong>€{package399.price}</strong></div><div className="packageCols"><div><h4>Ietilpst</h4>{package399.includes.map(x=><p key={x}><Check size={13}/>{x}</p>)}<p><Check size={13}/>{package399.pages}</p><p><Check size={13}/>{package399.language}</p></div><div><h4>Neietilpst</h4>{package399.excludes.map(x=><p key={x}><X size={13}/>{x}</p>)}</div></div><div className="scopeNotes"><p><b>Saturs:</b> {package399.contentRule}</p><p><b>Termiņš:</b> {package399.timeline}</p></div></section>
   <section className="panel rulesStrip"><div><b>Lead īpašumtiesības</b><p>{businessRules.leadOwnership} {businessRules.inactivity}</p></div><div><b>Komisija</b><p>{businessRules.commission} {businessRules.override} {businessRules.payouts}</p></div><div><b>Rēķins</b><p>{businessRules.invoice}</p></div></section>
   <div className="handoffBoundary"><div className="boundaryIcon"><UserCheck size={20}/></div><div><small>SVARĪGĀKĀ DARBA ROBEŽA</small><h3>Partnera darbs beidzas pie saņemtas priekšapmaksas.</h3><p>Līdz priekšapmaksai tu atrodi klientu, uzrunā, kvalificē, atbildi uz iebildumiem un noved līdz darījumam. Tiklīdz Toms apstiprina maksājumu, visu tālāko — materiālus, izstrādi, labojumus, atlikumu, publicēšanu un uzturēšanu — pārņem Toms.</p></div><span>DEPOSIT PAID → STOP</span></div>
