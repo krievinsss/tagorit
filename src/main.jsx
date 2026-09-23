@@ -87,7 +87,7 @@ function App({sessionUser,onLogout}){
    if(data.id){
     const d=await api.updateUser(data);const m=normMember(d.user);setMembers(v=>v.map(x=>x.id===m.id?m:x));log("Komandas dalībnieks atjaunināts",m.name);
    }else{
-    const d=await api.createUser(data);const m=normMember(d.user);setMembers(v=>[...v,m]);log("Komandas dalībnieks pievienots",m.name);setAgreementMember(m);alert("Pagaidu parole "+m.name+": "+d.tempPassword+"\n\nSaglabā to droši un nosūti darbiniekam atsevišķi.");
+    const d=await api.createUser(data);const m=normMember(d.user);setMembers(v=>[...v,m]);log("Komandas dalībnieks pievienots",m.name);alert("Pagaidu parole "+m.name+": "+d.tempPassword+"\n\nSaglabā to droši un nosūti darbiniekam atsevišķi. Vienošanās viņam parādīsies pirmajā ielogošanās reizē.");
    }
    setMemberModal(null);
   }catch(err){alert(err.message)}
