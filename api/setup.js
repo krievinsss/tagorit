@@ -41,7 +41,23 @@ export default async function handler(req,res){
   return json(res,405,{error:"Method not allowed"});
  }catch(e){
   console.error(e);
+  if(e?.message==="DATABASE_URL is not configured"){
+    return json(res,503,{error:"Vercel projektā nav iestatīts DATABASE_URL.",code:"DATABASE_URL_MISSING"});
+  }
+  if(e?.code==="42P01"){
+    return json(res,503,{error:"Neon datubāzes shēma vēl nav uzstādīta. Atver Neon SQL Editor un palaid db/schema.sql.",code:"SCHEMA_MISSING"});
+  }
+  if(e?.code==="28P01"){
+    return json(res,503,{error:"Neon DATABASE_URL lietotājvārds vai parole nav derīga.",code:"DATABASE_AUTH_FAILED"});
+  }
+  if(e?.code==="3D000"){
+    return json(res,503,{error:"DATABASE_URL norādītā Neon datubāze neeksistē.",code:"DATABASE_NOT_FOUND"});
+  }
   if(e?.code==="23505")return json(res,409,{error:"Šāds e-pasts jau eksistē"});
-  return json(res,500,{error:"Admin setup failed"});
+  const msg=String(e?.message||"");
+  if(/fetch failed|ENOTFOUND|ECONNREFUSED|connect/i.test(msg)){
+    return json(res,503,{error:"Neizdevās pieslēgties Neon datubāzei. Pārbaudi DATABASE_URL un Neon projekta statusu.",code:"DATABASE_UNREACHABLE"});
+  }
+  return json(res,500,{error:"Admin setup failed: "+(msg||"nezināma datubāzes kļūda"),code:"SETUP_FAILED"});
  }
 }
