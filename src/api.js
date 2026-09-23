@@ -5,6 +5,8 @@ async function request(path,options={}){
  return data;
 }
 export const api={
+ setupStatus:()=>request("/api/setup"),
+ createFirstAdmin:data=>request("/api/setup",{method:"POST",body:JSON.stringify(data)}),
  me:()=>request("/api/auth/me"),
  login:(email,password)=>request("/api/auth/login",{method:"POST",body:JSON.stringify({email,password})}),
  logout:()=>request("/api/auth/logout",{method:"POST"}),
