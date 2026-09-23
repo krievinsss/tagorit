@@ -23,7 +23,7 @@ function lostPolicy(reason,requestedDate){
  if(r==="DO_NOT_CONTACT")return{reason:r,doNotContact:true,reactivateAfter:null};
  if(r==="CALL_LATER"){
   const date=String(requestedDate||"").slice(0,10);
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return null;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date<=new Date().toISOString().slice(0,10))return null;
   return{reason:r,doNotContact:false,reactivateAfter:date};
  }
  const days=lostCooldownDays[r];
