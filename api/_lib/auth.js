@@ -34,7 +34,7 @@ export async function getUser(req){
   const token=cookies(req)[COOKIE];
   if(!token)return null;
   const q=sql();
-  const rows=await q`SELECT u.id,u.email,u.name,u.role,u.parent_user_id,u.payout_cents,u.override_cents,u.active,u.agreement_version,u.agreement_accepted_at,u.paper_signed
+  const rows=await q`SELECT u.id,u.email,u.name,u.role,u.parent_user_id,u.payout_cents,u.override_cents,u.active,u.agreement_version,u.agreement_accepted_at,u.paper_signed,u.independent_outreach
     FROM sessions s JOIN users u ON u.id=s.user_id
     WHERE s.token_hash=${hash(token)} AND s.expires_at>now() AND u.active=true LIMIT 1`;
   return rows[0]||null;
@@ -46,5 +46,5 @@ export async function requireUser(req,res,roles){
   return user;
 }
 export function publicUser(u){
- return {id:u.id,email:u.email,name:u.name,role:u.role,parentId:u.parent_user_id,payout:Number(u.payout_cents||0)/100,override:Number(u.override_cents||0)/100,active:u.active,agreementVersion:u.agreement_version,agreementAcceptedAt:u.agreement_accepted_at,paperSigned:u.paper_signed};
+ return {id:u.id,email:u.email,name:u.name,role:u.role,parentId:u.parent_user_id,payout:Number(u.payout_cents||0)/100,override:Number(u.override_cents||0)/100,active:u.active,agreementVersion:u.agreement_version,agreementAcceptedAt:u.agreement_accepted_at,paperSigned:u.paper_signed,independentOutreach:!!u.independent_outreach};
 }
