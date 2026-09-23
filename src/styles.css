@@ -223,3 +223,6 @@
 .lostState{display:grid;border:1px solid #e4d5d7;background:#fff5f6;border-radius:9px;padding:10px 11px}
 .lostState b{font-size:10px;color:#9a4652}.lostState small{font-size:8.5px;color:#756269;margin-top:3px}
 @media(max-width:720px){.lookupMatch,.offerGate{align-items:flex-start;flex-direction:column}.lookupMatch button{width:100%}}
+
+.scopeHardStop{display:flex;gap:9px;align-items:flex-start;margin-top:12px;padding:11px 12px;border-radius:9px;background:#fff3e6;border:1px solid #eed9b3;color:#825819}
+.scopeHardStop svg{flex:none;margin-top:1px}.scopeHardStop>div{display:grid}.scopeHardStop b{font-size:10px}.scopeHardStop span{font-size:9px;line-height:1.5;margin-top:3px;color:#75654f}
