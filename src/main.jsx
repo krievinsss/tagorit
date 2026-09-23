@@ -105,8 +105,8 @@ function App({sessionUser,onLogout}){
   <main><header><div><h1>{title}</h1><p>{isAdmin?"Visa komanda, klienti, vienošanās un komisijas vienuviet.":isLead?"Tavi klienti, tava komanda un override komisijas.":"Tavi klienti, process un nopelnītā nauda."}</p></div><div className="actions">{isAdmin&&<><button className="square" onClick={exportData}><Download size={17}/></button><label className="square"><Upload size={17}/><input hidden type="file" accept="application/json" onChange={importData}/></label></>}{["dashboard","leads"].includes(view)&&<button className="primary" onClick={()=>setModal({...emptyLead,ownerId:isAdmin?(members.find(m=>m.role==="sales"&&m.active)?.id||""):active})}><Plus size={16}/>Pievienot klientu</button>}</div></header>
    {view==="dashboard"&&<Dashboard stats={stats} leads={visible} members={members} edit={setModal} isAdmin={isAdmin} isLead={isLead} user={user} childIds={childIds}/>}
    {view==="leads"&&<Leads leads={filtered} members={members} query={query} setQuery={setQuery} status={status} setStatus={setStatus} edit={setModal} remove={removeLead} update={changeStatus}/>}
-   {view==="tutorial"&&<Tutorial/>}
-   {view==="scripts"&&<Scripts copied={copied} setCopied={setCopied}/>}
+   {view==="tutorial"&&<Tutorial isAdmin={isAdmin}/>}
+   {view==="scripts"&&<Scripts copied={copied} setCopied={setCopied} isAdmin={isAdmin}/>}
    {view==="messages"&&<Messages user={user} members={members} messages={messages} setMessages={setMessages} isAdmin={isAdmin}/>}
    {view==="support"&&<Support user={user} members={members} tickets={support} setTickets={setSupport} isAdmin={isAdmin}/>}
    {view==="handoff"&&isAdmin&&<Handoff leads={leads} members={members} take={id=>{setLeads(v=>v.map(l=>l.id===id?{...l,status:"MEETING"}:l));const l=leads.find(x=>x.id===id);log("Klients pārņemts",l?.company||id)}} edit={setModal}/>}
@@ -130,17 +130,19 @@ function Dashboard({stats,leads,members,edit,isAdmin,isLead,user,childIds}){retu
  <section className="panel"><div className="panelHead"><div><h2>Jaunākie klienti</h2><p>Atver, lai turpinātu darbu</p></div></div>{leads.slice(0,6).map(l=>{const o=members.find(m=>m.id===l.ownerId);return <button className="recent" key={l.id} onClick={()=>edit({...l})}><span>{l.company.slice(0,2).toUpperCase()}</span><div><b>{l.company}</b><small>{labels[l.status]} · {o?.name||"—"}</small></div></button>})}</section></div>
  </div>}
 function Leads({leads,members,query,setQuery,status,setStatus,edit,remove,update}){return <div className="content"><div className="filters"><div className="search"><Search size={16}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Meklēt uzņēmumu..."/></div><select value={status} onChange={e=>setStatus(e.target.value)}><option value="ALL">Visi statusi</option>{statuses.map(s=><option key={s} value={s}>{labels[s]}</option>)}</select><span>{leads.length} rezultāti</span></div><div className="panel tableWrap"><table><thead><tr><th>Uzņēmums</th><th>Atbildīgais</th><th>Statuss</th><th>Mockup</th><th>Kontakti</th><th>Follow-up</th><th>Vērtība</th><th></th></tr></thead><tbody>{leads.map(l=>{const o=members.find(m=>m.id===l.ownerId);return <tr key={l.id}><td><button className="company" onClick={()=>edit({...l})}><i>{l.company.slice(0,2).toUpperCase()}</i><div><b>{l.company}</b><small>{l.industry} · {l.city||"—"} · Score {l.score}</small></div></button></td><td><span className="pill"><UserRound size={12}/>{o?.name||"—"}</span></td><td><select className="status" value={l.status} onChange={e=>update(l.id,e.target.value)}>{statuses.map(s=><option key={s} value={s}>{labels[s]}</option>)}</select></td><td>{l.mockupImage?<button className="thumb" onClick={()=>edit({...l})}><img src={l.mockupImage}/><span>Skatīt</span></button>:<span className="muted">Nav</span>}</td><td><div className="contact">{l.email&&<a href={"mailto:"+l.email}><Mail size={14}/></a>}{l.phone&&<a href={"tel:"+l.phone}><Phone size={14}/></a>}</div></td><td>{l.nextFollowUp?<span className="pill"><CalendarClock size={12}/>{l.nextFollowUp}</span>:<span className="muted">—</span>}</td><td><b>€{l.value}</b></td><td><div className="rowActions"><button onClick={()=>edit({...l})}><Pencil size={14}/></button><button className="danger" onClick={()=>remove(l.id)}><Trash2 size={14}/></button></div></td></tr>})}</tbody></table>{!leads.length&&<div className="empty">Nav klientu.</div>}</div></div>}
-function Tutorial(){
+function Tutorial({isAdmin}){
  const[search,setSearch]=useState(""),[open,setOpen]=useState(playbookTutorial[0]?.id||""),[situationCat,setSituationCat]=useState("ALL");
  const q=search.trim().toLowerCase();
  const modules=playbookTutorial.filter(m=>!q||(m.title+" "+m.stage+" "+m.summary+" "+m.bullets.join(" ")).toLowerCase().includes(q));
- const cats=["ALL",...Array.from(new Set(salesSituations.map(x=>x.cat)))];
- const situations=salesSituations.filter(x=>(situationCat==="ALL"||x.cat===situationCat)&&(!q||(x.title+" "+x.what+" "+x.do.join(" ")+" "+x.dont.join(" ")).toLowerCase().includes(q)));
+ const allowedSituations=isAdmin?salesSituations:salesSituations.filter(x=>!["DEPOSIT PAID","IN DEVELOPMENT","WON"].includes(x.status));
+ const cats=["ALL",...Array.from(new Set(allowedSituations.map(x=>x.cat)))];
+ const situations=allowedSituations.filter(x=>(situationCat==="ALL"||x.cat===situationCat)&&(!q||(x.title+" "+x.what+" "+x.do.join(" ")+" "+x.dont.join(" ")).toLowerCase().includes(q)));
  return <div className="content playbookPage">
   <div className="intro playbookIntro"><div><span className="eyebrow">TAGORIT SALES PLAYBOOK</span><h2>No pirmā lead līdz apmaksātam klientam</h2><p>Šī ir darba rokasgrāmata ikdienai. Ja neesi pārliecināts, ko darīt konkrētā situācijā, vispirms atrodi to šeit; ja jautājums ir par custom cenu, tehnisku funkciju vai nestandarta vienošanos — nodod Tomam.</p></div><div className="priceBox"><small>Standarta piedāvājums</small><b>399 €</b><span>50% priekšapmaksa · 2 labojumu cikli</span></div></div>
+  <div className="handoffBoundary"><div className="boundaryIcon"><UserCheck size={20}/></div><div><small>SVARĪGĀKĀ DARBA ROBEŽA</small><h3>Partnera darbs beidzas pie saņemtas priekšapmaksas.</h3><p>Līdz priekšapmaksai tu atrodi klientu, uzrunā, kvalificē, atbildi uz iebildumiem un noved līdz darījumam. Tiklīdz Toms apstiprina maksājumu, visu tālāko — materiālus, izstrādi, labojumus, atlikumu, publicēšanu un uzturēšanu — pārņem Toms.</p></div><span>DEPOSIT PAID → STOP</span></div>
   <div className="playbookTools"><div className="search playbookSearch"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Meklē: atlaide, e-veikals, follow-up, priekšapmaksa..."/></div><div className="quickRules"><span><CheckCircle2 size={13}/>Komisija tikai pēc priekšapmaksas</span><span><UserCheck size={13}/>Custom → Toms</span><span><ShieldCheck size={13}/>Nesoli to, ko neesi saskaņojis</span></div></div>
   <section className="playbookSection">
-   <div className="sectionHeading"><div><span className="eyebrow">DARBA PROCESS</span><h2>13 soļi, kuri jāzina katram partnerim</h2></div><span>{modules.length} sadaļas</span></div>
+   <div className="sectionHeading"><div><span className="eyebrow">DARBA PROCESS</span><h2>{playbookTutorial.length} soļi, kuri jāzina katram partnerim</h2></div><span>{modules.length} sadaļas</span></div>
    <div className="moduleList">{modules.map((m,i)=><article className={"playModule "+(open===m.id?"open":"")} key={m.id}>
     <button className="moduleHead" onClick={()=>setOpen(open===m.id?"":m.id)}><div className="moduleNo">{String(i+1).padStart(2,"0")}</div><div><small>{m.stage}</small><h3>{m.title}</h3><p>{m.summary}</p></div><span className="moduleToggle">{open===m.id?"−":"+"}</span></button>
     {open===m.id&&<div className="moduleBody">
@@ -159,14 +161,15 @@ function Tutorial(){
  </div>
 }
 
-function Scripts({copied,setCopied}){
+function Scripts({copied,setCopied,isAdmin}){
  const[search,setSearch]=useState(""),[cat,setCat]=useState("ALL");
- const cats=["ALL",...Array.from(new Set(salesScripts.map(x=>x.cat)))];
+ const visibleScripts=isAdmin?salesScripts:salesScripts.filter(x=>!["Materiāli","Labojumi","Launch","Maintenance"].includes(x.cat));
+ const cats=["ALL",...Array.from(new Set(visibleScripts.map(x=>x.cat)))];
  const q=search.trim().toLowerCase();
- const items=salesScripts.filter(x=>(cat==="ALL"||x.cat===cat)&&(!q||(x.title+" "+x.subject+" "+x.when+" "+x.text).toLowerCase().includes(q)));
+ const items=visibleScripts.filter(x=>(cat==="ALL"||x.cat===cat)&&(!q||(x.title+" "+x.subject+" "+x.when+" "+x.text).toLowerCase().includes(q)));
  function cp(i,t){navigator.clipboard?.writeText(t);setCopied(i);setTimeout(()=>setCopied(""),1200)}
  return <div className="content scriptsPage">
-  <div className="intro scriptsIntro"><div><span className="eyebrow">GATAVĀS SAGATAVES</span><h2>Skripti gandrīz katrai pārdošanas situācijai</h2><p>Nekopē akli. Pielāgo uzņēmuma nosaukumu, konkrēto situāciju un to, ko klients jau ir pateicis. Skripts ir drošs pamats, nevis robots.</p></div><div className="scriptCount"><b>{salesScripts.length}</b><span>gatavas sagataves</span></div></div>
+  <div className="intro scriptsIntro"><div><span className="eyebrow">GATAVĀS SAGATAVES</span><h2>Skripti gandrīz katrai pārdošanas situācijai</h2><p>Nekopē akli. Pielāgo uzņēmuma nosaukumu, konkrēto situāciju un to, ko klients jau ir pateicis. Skripts ir drošs pamats, nevis robots.</p></div><div className="scriptCount"><b>{visibleScripts.length}</b><span>gatavas sagataves</span></div></div>
   <div className="scriptToolbar"><div className="search playbookSearch"><Search size={15}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Meklē skriptu..."/></div><div className="catBar scriptCats">{cats.map(c=><button key={c} className={cat===c?"active":""} onClick={()=>setCat(c)}>{c==="ALL"?"Visi":c}</button>)}</div></div>
   <div className="scriptGrid detailedScripts">{items.map((x,i)=>{const key=x.title+i;return <section className="panel script detailedScript" key={key}><div className="scriptTop"><div><span className="eyebrow">{x.cat}</span><h2>{x.title}</h2></div><button className="secondary" onClick={()=>cp(key,"Temats: "+x.subject+"\n\n"+x.text)}>{copied===key?<><Check size={14}/>Nokopēts</>:<><Copy size={14}/>Kopēt</>}</button></div><div className="scriptMeta"><div><small>Kad izmantot</small><p>{x.when}</p></div><div><small>Temats</small><p>{x.subject}</p></div></div><pre>{x.text}</pre><div className="scriptNext"><CheckCircle2 size={14}/><div><small>Pēc nosūtīšanas</small><b>{x.next}</b></div></div></section>})}</div>
   {!items.length&&<div className="empty">Nekas netika atrasts. Pamēģini citu meklējamo vārdu vai kategoriju.</div>}
