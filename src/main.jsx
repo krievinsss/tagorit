@@ -107,6 +107,9 @@ function App(){
    {view==="leads"&&<Leads leads={filtered} members={members} query={query} setQuery={setQuery} status={status} setStatus={setStatus} edit={setModal} remove={removeLead} update={changeStatus}/>}
    {view==="tutorial"&&<Tutorial/>}
    {view==="scripts"&&<Scripts copied={copied} setCopied={setCopied}/>}
+   {view==="messages"&&<Messages user={user} members={members} messages={messages} setMessages={setMessages} isAdmin={isAdmin}/>}
+   {view==="support"&&<Support user={user} members={members} tickets={support} setTickets={setSupport} isAdmin={isAdmin}/>}
+   {view==="handoff"&&isAdmin&&<Handoff leads={leads} members={members} take={id=>{setLeads(v=>v.map(l=>l.id===id?{...l,status:"MEETING"}:l));const l=leads.find(x=>x.id===id);log("Klients pārņemts",l?.company||id)}} edit={setModal}/>}
    {view==="team"&&isAdmin&&<Team members={members} leads={leads} edit={setMemberModal} add={()=>setMemberModal({name:"",email:"",role:"sales",parentId:"admin",payout:50,override:0,active:true})} togglePaper={togglePaper}/>}
    {view==="audit"&&isAdmin&&<Audit audit={audit} members={members}/>}
   </main>
