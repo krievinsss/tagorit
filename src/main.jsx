@@ -46,13 +46,15 @@ function printAgreement(member){const w=window.open("","_blank","width=900,heigh
 function App({sessionUser,onLogout}){
  const[members,setMembers]=useState([normMember(sessionUser)]);
  const[leads,setLeads]=useState([]);
- const[audit,setAudit]=useState(()=>{try{return JSON.parse(localStorage.getItem("tagorit_audit"))||[]}catch{return[]}});\n const[messages,setMessages]=useState(()=>{try{return JSON.parse(localStorage.getItem("tagorit_messages"))||[]}catch{return[]}});\n const[support,setSupport]=useState(()=>{try{return JSON.parse(localStorage.getItem("tagorit_support"))||[]}catch{return[]}});
+ const[audit,setAudit]=useState(()=>{try{return JSON.parse(localStorage.getItem("tagorit_audit"))||[]}catch{return[]}});
+ const[messages,setMessages]=useState([]);
+ const[support,setSupport]=useState([]);
  const[active,setActive]=useState(sessionUser.id);
  const[backendLoading,setBackendLoading]=useState(true),[backendError,setBackendError]=useState("");
  const[view,setView]=useState("dashboard"),[query,setQuery]=useState(""),[status,setStatus]=useState("ALL"),[modal,setModal]=useState(null),[memberModal,setMemberModal]=useState(null),[agreementMember,setAgreementMember]=useState(null),[copied,setCopied]=useState("");
  useEffect(()=>{let alive=true;Promise.all([api.bootstrap(),api.messages(),api.support()]).then(([d,m,t])=>{if(!alive)return;setMembers((d.users||[]).map(normMember));setLeads((d.leads||[]).map(normLead));setMessages(m.messages||[]);setSupport(t.tickets||[]);setActive(d.user.id);setBackendLoading(false)}).catch(e=>{if(!alive)return;setBackendError(e.message);setBackendLoading(false)});return()=>{alive=false}},[]);
 
- useEffect(()=>localStorage.setItem("tagorit_audit",JSON.stringify(audit)),[audit]);\n useEffect(()=>localStorage.setItem("tagorit_messages",JSON.stringify(messages)),[messages]);\n useEffect(()=>localStorage.setItem("tagorit_support",JSON.stringify(support)),[support]);
+ useEffect(()=>localStorage.setItem("tagorit_audit",JSON.stringify(audit)),[audit]);
 
 
  const user=members.find(m=>m.id===active)||members[0],isAdmin=user.role==="admin",isLead=user.role==="team_lead";
