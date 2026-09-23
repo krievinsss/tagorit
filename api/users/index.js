@@ -23,7 +23,7 @@ export default async function handler(req,res){
     const parent=d.role==="team_lead"?actor.id:(d.parentId||actor.id);
     const rows=await q`INSERT INTO users(email,password_hash,name,role,parent_user_id,payout_cents,override_cents)
       VALUES(${d.email.trim().toLowerCase()},${passwordHash},${d.name.trim()},${d.role},${parent},${Math.round(Number(d.payout||50)*100)},${Math.round(Number(d.override||0)*100)})
-      RETURNING id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed,independent_outreach,independent_outreach`;
+      RETURNING id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed,independent_outreach`;
     await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id,details) VALUES(${actor.id},'USER_CREATED','user',${rows[0].id},${JSON.stringify({email:d.email,role:d.role})}::jsonb)`;
     return json(res,201,{user:publicUser(rows[0]),tempPassword});
   }
@@ -62,7 +62,7 @@ export default async function handler(req,res){
       independent_outreach=${d.independentOutreach??current.independent_outreach},
       updated_at=now()
       WHERE id=${d.id}
-      RETURNING id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed`;
+      RETURNING id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed,independent_outreach`;
     await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id) VALUES(${actor.id},'USER_UPDATED','user',${d.id})`;
     return json(res,200,{user:publicUser(rows[0])});
   }
