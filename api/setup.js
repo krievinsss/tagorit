@@ -45,6 +45,8 @@ async function ensureSchema(q){
     website text,
     email text,
     phone text,
+    website_type text NOT NULL DEFAULT 'UNKNOWN',
+    offer_code text NOT NULL DEFAULT 'CUSTOM_QUOTE',
     score integer NOT NULL DEFAULT 50 CHECK(score BETWEEN 0 AND 100),
     status text NOT NULL DEFAULT 'NEW',
     value_cents integer NOT NULL DEFAULT 39900,
@@ -65,6 +67,12 @@ async function ensureSchema(q){
     mockup_url text,
     last_contact date,
     next_follow_up date,
+    lost_reason text,
+    lost_at timestamptz,
+    reactivate_after date,
+    do_not_contact boolean NOT NULL DEFAULT false,
+    reactivation_count integer NOT NULL DEFAULT 0,
+    last_reactivated_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
   )`;
@@ -83,6 +91,14 @@ async function ensureSchema(q){
   await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS review_requested_at timestamptz`;
   await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS reviewed_at timestamptz`;
   await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS reviewed_by uuid REFERENCES users(id) ON DELETE SET NULL`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS website_type text NOT NULL DEFAULT 'UNKNOWN'`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS offer_code text NOT NULL DEFAULT 'CUSTOM_QUOTE'`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS lost_reason text`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS lost_at timestamptz`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS reactivate_after date`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS do_not_contact boolean NOT NULL DEFAULT false`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS reactivation_count integer NOT NULL DEFAULT 0`;
+  await q`ALTER TABLE leads ADD COLUMN IF NOT EXISTS last_reactivated_at timestamptz`;
 
   await q`CREATE TABLE IF NOT EXISTS lead_activity (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
