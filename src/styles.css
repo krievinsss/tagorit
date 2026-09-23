@@ -28,3 +28,27 @@
 
 .handoffBoundary{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;background:#171e2e;color:#fff;border-radius:13px;padding:16px 18px;border:1px solid #273148}.boundaryIcon{width:38px;height:38px;border-radius:10px;background:#2a3550;display:grid;place-items:center;color:#cfc7ff}.handoffBoundary small{font-size:7px;letter-spacing:.1em;color:#9aa6ba;font-weight:800}.handoffBoundary h3{font-size:12px;margin:3px 0}.handoffBoundary p{font-size:8px;line-height:1.5;color:#aeb7c6;margin:0;max-width:900px}.handoffBoundary>span{font-size:7px;font-weight:800;white-space:nowrap;background:#2b3550;border:1px solid #3a4664;border-radius:999px;padding:6px 8px;color:#eeeaff}
 @media(max-width:900px){.handoffBoundary{grid-template-columns:38px 1fr}.handoffBoundary>span{grid-column:2;justify-self:start}}
+
+/* Tutorial / Scripts readability pass */
+.playbookPage,.scriptsPage{font-size:16px;line-height:1.6}
+.playbookSearch input{font-size:15px!important}
+.quickRules span,.catBar button,.scriptCats button{font-size:14px!important}
+.sectionHeading .eyebrow,.playbookIntro .eyebrow,.scriptsIntro .eyebrow,.scriptTop .eyebrow,.moduleHead small,.handoffBoundary small{font-size:13px!important;letter-spacing:.08em}
+.sectionHeading h2,.playbookIntro h2,.scriptsIntro h2{font-size:32px!important;line-height:1.2}
+.playbookIntro p,.scriptsIntro p,.handoffBoundary p,.situationWhat,.scriptMeta p,.scriptNext small,.scriptNext b{font-size:16px!important}
+.moduleHead h3{font-size:30px!important;line-height:1.25}
+.moduleHead p{font-size:16px!important;line-height:1.6}
+.moduleNo{font-size:20px!important}
+.moduleBody h4,.situationCard h3,.scriptTop h2,.playAction b,.avoidBox b{font-size:20px!important}
+.moduleBody li,.moduleBody p,.checklist span,.statusGuide small,.statusGuide b,.playAction p,.avoidBox p,.dosDonts p,.dosDonts h4,.situationTop span,.situationTop b{font-size:16px!important;line-height:1.7}
+.scriptMeta small{font-size:13px!important}
+.detailedScript pre{font-size:15px!important;line-height:1.7;white-space:pre-wrap}
+.scriptCount b{font-size:36px!important}
+.scriptCount span{font-size:15px!important}
+.handoffBoundary h3{font-size:24px!important}
+.handoffBoundary>span{font-size:15px!important}
+@media(max-width:900px){
+  .sectionHeading h2,.playbookIntro h2,.scriptsIntro h2{font-size:26px!important}
+  .moduleHead h3{font-size:24px!important}
+  .moduleHead p,.moduleBody li,.moduleBody p,.checklist span,.playAction p,.avoidBox p,.dosDonts p,.situationWhat,.scriptMeta p,.detailedScript pre{font-size:15px!important}
+}
