@@ -11,6 +11,7 @@ export const api={
  bootstrap:()=>request("/api/bootstrap"),
  users:()=>request("/api/users"),
  createUser:data=>request("/api/users",{method:"POST",body:JSON.stringify(data)}),
+ updateUser:data=>request("/api/users",{method:"PUT",body:JSON.stringify(data)}),
  createLead:data=>request("/api/leads",{method:"POST",body:JSON.stringify(data)}),
  updateLead:data=>request("/api/leads",{method:"PUT",body:JSON.stringify(data)}),
  deleteLead:id=>request("/api/leads?id="+encodeURIComponent(id),{method:"DELETE"})
