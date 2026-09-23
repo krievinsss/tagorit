@@ -6,22 +6,25 @@ import { sql } from "../_lib/db.js";
 
 export default async function handler(req,res){
  try{
-  const admin=await requireUser(req,res,["admin"]);if(!admin)return;
+  const actor=await requireUser(req,res);if(!actor)return;
   const q=sql();
   if(req.method==="GET"){
-    const rows=await q`SELECT id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed FROM users ORDER BY created_at`;
+    if(actor.role!=="admin")return json(res,403,{error:"Forbidden"});
+    const rows=await q`SELECT id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed,independent_outreach FROM users ORDER BY created_at`;
     return json(res,200,{users:rows.map(publicUser)});
   }
   if(req.method==="POST"){
+    if(actor.role!=="admin")return json(res,403,{error:"Forbidden"});
+    const admin=actor;
     const d=await body(req);
     if(!d.name||!d.email||!["team_lead","sales"].includes(d.role))return json(res,400,{error:"Nepilnīgi lietotāja dati"});
     const tempPassword=crypto.randomBytes(9).toString("base64url");
     const passwordHash=await bcrypt.hash(tempPassword,12);
-    const parent=d.role==="team_lead"?admin.id:(d.parentId||admin.id);
+    const parent=d.role==="team_lead"?actor.id:(d.parentId||actor.id);
     const rows=await q`INSERT INTO users(email,password_hash,name,role,parent_user_id,payout_cents,override_cents)
       VALUES(${d.email.trim().toLowerCase()},${passwordHash},${d.name.trim()},${d.role},${parent},${Math.round(Number(d.payout||50)*100)},${Math.round(Number(d.override||0)*100)})
-      RETURNING id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed`;
-    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id,details) VALUES(${admin.id},'USER_CREATED','user',${rows[0].id},${JSON.stringify({email:d.email,role:d.role})}::jsonb)`;
+      RETURNING id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed,independent_outreach,independent_outreach`;
+    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id,details) VALUES(${actor.id},'USER_CREATED','user',${rows[0].id},${JSON.stringify({email:d.email,role:d.role})}::jsonb)`;
     return json(res,201,{user:publicUser(rows[0]),tempPassword});
   }
   if(req.method==="PUT"){
@@ -29,9 +32,22 @@ export default async function handler(req,res){
     if(!d.id)return json(res,400,{error:"Missing user id"});
     const current=(await q`SELECT * FROM users WHERE id=${d.id} LIMIT 1`)[0];
     if(!current)return json(res,404,{error:"User not found"});
-    if(current.role==="admin"&&current.id===admin.id && d.active===false)return json(res,400,{error:"Nevar bloķēt savu admin kontu"});
+
+    if(actor.role==="team_lead"){
+      if(current.role!=="sales"||current.parent_user_id!==actor.id)return json(res,403,{error:"Vari vadīt tikai savus tiešos Sales Partnerus"});
+      const rows=await q`UPDATE users SET independent_outreach=${!!d.independentOutreach},updated_at=now()
+        WHERE id=${d.id}
+        RETURNING id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed,independent_outreach`;
+      await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id,details)
+        VALUES(${actor.id},'OUTREACH_MODE_CHANGED','user',${d.id},${JSON.stringify({independentOutreach:!!d.independentOutreach})}::jsonb)`;
+      return json(res,200,{user:publicUser(rows[0])});
+    }
+
+    if(actor.role!=="admin")return json(res,403,{error:"Forbidden"});
+    const admin=actor;
+    if(current.role==="admin"&&current.id===actor.id && d.active===false)return json(res,400,{error:"Nevar bloķēt savu admin kontu"});
     const role=["team_lead","sales"].includes(d.role)?d.role:current.role;
-    const parent=role==="team_lead"?admin.id:(d.parentId||current.parent_user_id||admin.id);
+    const parent=role==="team_lead"?actor.id:(d.parentId||current.parent_user_id||actor.id);
     const rows=await q`UPDATE users SET
       name=${d.name||current.name},
       email=${String(d.email||current.email).toLowerCase().trim()},
@@ -43,10 +59,11 @@ export default async function handler(req,res){
       agreement_version=${d.agreementVersion??current.agreement_version},
       agreement_accepted_at=${d.agreementAcceptedAt??current.agreement_accepted_at},
       paper_signed=${d.paperSigned??current.paper_signed},
+      independent_outreach=${d.independentOutreach??current.independent_outreach},
       updated_at=now()
       WHERE id=${d.id}
       RETURNING id,email,name,role,parent_user_id,payout_cents,override_cents,active,agreement_version,agreement_accepted_at,paper_signed`;
-    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id) VALUES(${admin.id},'USER_UPDATED','user',${d.id})`;
+    await q`INSERT INTO audit_log(actor_id,action,entity_type,entity_id) VALUES(${actor.id},'USER_UPDATED','user',${d.id})`;
     return json(res,200,{user:publicUser(rows[0])});
   }
   json(res,405,{error:"Method not allowed"});
