@@ -6,9 +6,9 @@ async function load(q,user){
  let tickets;
  if(user.role==="admin")tickets=await q`SELECT * FROM support_tickets ORDER BY updated_at DESC`;
  else tickets=await q`SELECT * FROM support_tickets WHERE user_id=${user.id} ORDER BY updated_at DESC`;
- const ids=tickets.map(t=>t.id);
  let replies=[];
- if(ids.length)replies=await q`SELECT * FROM support_replies WHERE ticket_id=ANY(${ids}::uuid[]) ORDER BY created_at`;
+ if(user.role==="admin") replies=await q`SELECT r.* FROM support_replies r JOIN support_tickets t ON t.id=r.ticket_id ORDER BY r.created_at`;
+ else replies=await q`SELECT r.* FROM support_replies r JOIN support_tickets t ON t.id=r.ticket_id WHERE t.user_id=${user.id} ORDER BY r.created_at`;
  return tickets.map(t=>({id:t.id,userId:t.user_id,subject:t.subject,body:t.body,status:t.status,createdAt:t.created_at,replies:replies.filter(r=>r.ticket_id===t.id).map(r=>({id:r.id,from:r.sender_id,body:r.body,at:r.created_at}))}));
 }
 
