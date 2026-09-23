@@ -12,6 +12,11 @@ export const api={
  users:()=>request("/api/users"),
  createUser:data=>request("/api/users",{method:"POST",body:JSON.stringify(data)}),
  updateUser:data=>request("/api/users",{method:"PUT",body:JSON.stringify(data)}),
+ acceptAgreement:version=>request("/api/agreement",{method:"POST",body:JSON.stringify({version})}),
+ messages:()=>request("/api/messages"),
+ sendMessage:data=>request("/api/messages",{method:"POST",body:JSON.stringify(data)}),
+ support:()=>request("/api/support"),
+ supportAction:data=>request("/api/support",{method:"POST",body:JSON.stringify(data)}),
  createLead:data=>request("/api/leads",{method:"POST",body:JSON.stringify(data)}),
  updateLead:data=>request("/api/leads",{method:"PUT",body:JSON.stringify(data)}),
  deleteLead:id=>request("/api/leads?id="+encodeURIComponent(id),{method:"DELETE"})
